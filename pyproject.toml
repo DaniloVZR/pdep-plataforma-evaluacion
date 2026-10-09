@@ -1,0 +1,22 @@
+[project]
+name = "pdep-plataforma-evaluacion"
+version = "0.1.0"
+description = "Prototipo de la Plataforma de evaluación de proyectos institucionales (HU-003, HU-005, HU-007)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 95
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "class .*\\(Protocol\\):",
+]

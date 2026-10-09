@@ -1,0 +1,23 @@
+name: Pruebas y análisis estático
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+      - name: Pruebas con cobertura de ramas
+        run: |
+          coverage run -m pytest
+          coverage report
+      - name: Pylint
+        run: pylint app tests --fail-under=9.0
