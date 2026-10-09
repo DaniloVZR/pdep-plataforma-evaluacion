@@ -18,3 +18,8 @@ instance/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Salidas generadas de los diagramas
+docs/diagramas/*.png
+docs/diagramas/*.dot
+docs/diagramas/caminos.json

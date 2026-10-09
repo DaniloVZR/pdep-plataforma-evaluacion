@@ -1,0 +1,15 @@
+skinparam dpi 200
+skinparam monochrome true
+skinparam shadowing false
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Liberation Sans"
+skinparam defaultFontSize 11
+skinparam classFontStyle bold
+skinparam roundcorner 0
+skinparam packageStyle rectangle
+skinparam nodesep 25
+skinparam ranksep 40
+skinparam NoteFontSize 10
+hide circle
+hide empty members

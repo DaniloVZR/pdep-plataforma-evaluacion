@@ -1,0 +1,78 @@
+@startuml Clases_HU003_lr
+!include estilo.iuml
+left to right direction
+
+class UsuarioControlador <<blueprint POST /api/usuarios>> {
+  + construir_servicio(): RegistroUsuarioServicio
+  + registrar_usuario(): tuple[Response, 201]
+}
+class RegistroUsuarioServicio {
+  - institucion_repo: InstitucionRepositorio
+  - programa_repo: ProgramaRepositorio
+  - asignatura_repo: AsignaturaRepositorio
+  - usuario_repo: UsuarioRepositorio
+  + registrar(datos: object): Usuario
+}
+class usuario_validador <<módulo>> {
+  + validar_datos_registro(datos: object): None
+  + normalizar_correo(correo: str): str
+  + extraer_dominio(correo: str): str
+  + dominio_es_institucional(correo: str, dominios: frozenset[str]): bool
+}
+class comunes <<módulo>> {
+  + es_entero_positivo(valor: object): bool
+  + es_texto_no_vacio(valor: object): bool
+  + es_lista_de_ids(valor: object): bool
+}
+interface InstitucionRepositorio {
+  + listar_dominios(): frozenset[str]
+}
+interface ProgramaRepositorio {
+  + existe(programa_id: int): bool
+}
+interface AsignaturaRepositorio {
+  + ids_existentes(ids: tuple[int, ...]): frozenset[int]
+}
+interface UsuarioRepositorio {
+  + existe_correo(correo: str): bool
+  + guardar(usuario: Usuario): Usuario
+}
+class SqliteUsuarioRepositorio {
+  - conexion: sqlite3.Connection
+  + existe_correo(correo: str): bool
+  + guardar(usuario: Usuario): Usuario
+}
+class Usuario <<dataclass frozen>> {
+  + id: int | None
+  + nombres: str
+  + correo: str
+  + rol: Rol
+  + programa_id: int
+  + asignatura_ids: tuple[int, ...]
+}
+enum Rol {
+  ESTUDIANTE
+  DOCENTE
+}
+class "Excepciones que lanza" as Errores <<ErrorDominio>> {
+  DatoInvalidoError → 400
+  CorreoNoInstitucionalError → 422
+  CorreoDuplicadoError → 409
+  ProgramaNoEncontradoError → 404
+  AsignaturaNoEncontradaError → 404
+}
+
+UsuarioControlador --> RegistroUsuarioServicio : crea y llama
+RegistroUsuarioServicio ..> usuario_validador : usa
+usuario_validador ..> comunes
+RegistroUsuarioServicio o--> InstitucionRepositorio
+RegistroUsuarioServicio o--> ProgramaRepositorio
+RegistroUsuarioServicio o--> AsignaturaRepositorio
+RegistroUsuarioServicio o--> UsuarioRepositorio
+SqliteUsuarioRepositorio ..|> UsuarioRepositorio
+RegistroUsuarioServicio ..> Usuario : crea
+Usuario --> Rol
+RegistroUsuarioServicio ..> Errores : lanza
+SqliteUsuarioRepositorio ..> ConflictoUnicidadError : lanza si UNIQUE(correo)
+class ConflictoUnicidadError <<Exception>>
+@enduml

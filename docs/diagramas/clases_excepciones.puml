@@ -1,0 +1,42 @@
+@startuml Clases_infraestructura
+!include estilo.iuml
+skinparam ranksep 35
+
+class create_app <<fábrica Flask>> {
+  + create_app(config: dict | None): Flask
+  + manejar_error_dominio(error: ErrorDominio): tuple[Response, int]
+}
+class sqlite_repositorios <<módulo>> {
+  + transaccion(conexion: sqlite3.Connection): contextmanager
+}
+class ErrorDominio {
+  + codigo: str
+  + estado_http: int
+  + mensaje: str
+}
+class DatoInvalidoError <<400>>
+class EvaluadorNoAsignadoError <<403>>
+class RecursoNoEncontradoError <<404>>
+class ConflictoError <<409>>
+class ReglaNegocioError <<422>>
+class ErrorPersistencia <<500>>
+class ConflictoUnicidadError <<Exception interna>>
+
+class "ProgramaNoEncontradoError\nAsignaturaNoEncontradaError\nEquipoNoEncontradoError\nFeriaNoEncontradaError\nRubricaNoEncontradaError (422)" as R404
+class "CorreoDuplicadoError\nProyectoDuplicadoError\nEvaluacionYaConfirmadaError" as R409
+class "CorreoNoInstitucionalError\nAsignaturaNoParticipanteError\nInscripcionNoAbiertaError\nPlazoVencidoError\nRubricaSinCriteriosError\nPesosInvalidosError\nNotasIncompletasError\nTipoNotaInvalidoError\nNotaFueraDeRangoError" as R422
+
+ErrorDominio <|-- DatoInvalidoError
+ErrorDominio <|-- EvaluadorNoAsignadoError
+ErrorDominio <|-- RecursoNoEncontradoError
+ErrorDominio <|-- ConflictoError
+ErrorDominio <|-- ReglaNegocioError
+ErrorDominio <|-- ErrorPersistencia
+RecursoNoEncontradoError <|-- R404
+ConflictoError <|-- R409
+ReglaNegocioError <|-- R422
+
+create_app ..> ErrorDominio : atrapa → JSON {codigo, mensaje}
+sqlite_repositorios ..> ConflictoUnicidadError : IntegrityError UNIQUE
+sqlite_repositorios ..> ErrorPersistencia : otro sqlite3.Error + ROLLBACK
+@enduml

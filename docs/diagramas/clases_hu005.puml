@@ -1,0 +1,82 @@
+@startuml Clases_HU005_lr
+!include estilo.iuml
+left to right direction
+
+class ProyectoControlador <<blueprint POST /api/proyectos>> {
+  + construir_servicio(): InscripcionServicio
+  + inscribir_proyecto(): tuple[Response, 201]
+}
+class InscripcionServicio {
+  - equipo_repo: EquipoRepositorio
+  - feria_repo: FeriaRepositorio
+  - proyecto_repo: ProyectoRepositorio
+  - reloj: Reloj
+  + inscribir(datos: object): Proyecto
+}
+class proyecto_validador <<módulo>> {
+  + validar_datos_inscripcion(datos: object): None
+  + normalizar_nombre(nombre: str): str
+}
+interface Reloj {
+  + hoy(): date
+  + ahora(): datetime
+}
+class RelojSistema {
+  + hoy(): date
+  + ahora(): datetime
+}
+interface EquipoRepositorio {
+  + existe(equipo_id: int): bool
+}
+interface FeriaRepositorio {
+  + obtener(feria_id: int): Feria | None
+}
+interface ProyectoRepositorio {
+  + existe_en_feria(equipo_id: int, nombre_normalizado: str, feria_id: int): bool
+  + registrar(proyecto: Proyecto, nombre_normalizado: str): Proyecto
+}
+class Feria <<dataclass frozen>> {
+  + id: int
+  + nombre: str
+  + fecha_inicio: date
+  + fecha_fin: date
+  + asignatura_ids: frozenset[int]
+  --
+  + acepta_asignaturas(ids: frozenset[int]): bool
+}
+class Proyecto <<dataclass frozen>> {
+  + id: int | None
+  + equipo_id: int
+  + feria_id: int
+  + nombre: str
+  + descripcion: str
+  + modalidad: Modalidad
+  + asignatura_ids: tuple[int, ...]
+  + fecha_inscripcion: date
+}
+enum Modalidad {
+  PA
+  PIA
+}
+class "Excepciones que lanza" as Errores <<ErrorDominio>> {
+  DatoInvalidoError → 400
+  EquipoNoEncontradoError → 404
+  FeriaNoEncontradaError → 404
+  AsignaturaNoParticipanteError → 422
+  InscripcionNoAbiertaError → 422
+  PlazoVencidoError → 422
+  ProyectoDuplicadoError → 409
+}
+
+ProyectoControlador --> InscripcionServicio : crea y llama
+InscripcionServicio ..> proyecto_validador : usa
+InscripcionServicio o--> Reloj
+RelojSistema ..|> Reloj
+InscripcionServicio o--> EquipoRepositorio
+InscripcionServicio o--> FeriaRepositorio
+InscripcionServicio o--> ProyectoRepositorio
+FeriaRepositorio ..> Feria : devuelve
+InscripcionServicio ..> Proyecto : crea
+Proyecto --> Modalidad
+InscripcionServicio ..> Errores : lanza
+@enduml

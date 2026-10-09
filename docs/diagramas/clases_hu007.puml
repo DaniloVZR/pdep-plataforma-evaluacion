@@ -1,0 +1,92 @@
+@startuml Clases_HU007
+!include estilo.iuml
+
+class EvaluacionControlador <<blueprint PUT /api/proyectos/{id}/evaluacion>> {
+  + construir_servicio(): CalificacionServicio
+  + calificar_proyecto(proyecto_id: int): tuple[Response, 200]
+}
+class CalificacionServicio {
+  - evaluacion_repo: EvaluacionRepositorio
+  - rubrica_repo: RubricaRepositorio
+  - reloj: Reloj
+  + calificar(proyecto_id: int, datos: object): Evaluacion
+}
+class calificacion_validador <<módulo>> {
+  + validar_solicitud_calificacion(datos: object): tuple[int, dict[int, object], bool]
+  + validar_rubrica(rubrica: Rubrica): None
+  + validar_notas_completas(rubrica: Rubrica, notas: dict[int, object]): None
+}
+interface EvaluacionRepositorio {
+  + obtener_asignada(evaluador_id: int, proyecto_id: int): Evaluacion | None
+  + guardar_calificacion(evaluacion: Evaluacion): Evaluacion
+}
+interface RubricaRepositorio {
+  + obtener_por_feria(feria_id: int): Rubrica | None
+}
+interface Reloj {
+  + hoy(): date
+  + ahora(): datetime
+}
+class Rubrica <<dataclass frozen>> {
+  + id: int
+  + feria_id: int
+  + nota_minima: float = 1.0
+  + nota_maxima: float = 5.0
+  + criterios: tuple[Criterio, ...]
+  --
+  + ids_criterios(): frozenset[int]
+  + pesos_validos(): bool
+  + validar_nota(nota: object): float
+  + calcular_puntaje(notas: dict[int, object]): float
+}
+class Criterio <<dataclass frozen>> {
+  + id: int
+  + nombre: str
+  + peso: float
+}
+class Evaluacion <<dataclass frozen>> {
+  + id: int
+  + proyecto_id: int
+  + evaluador_id: int
+  + feria_id: int
+  + estado: EstadoEvaluacion
+  + puntaje_final: float | None
+  + fecha_confirmacion: datetime | None
+  + notas: dict[int, float]
+  --
+  + puntaje_visible: float | None  «property»
+  + con_calificacion(notas: dict[int, float], puntaje: float, confirmada: bool, momento: datetime): Evaluacion
+}
+enum EstadoEvaluacion {
+  PENDIENTE
+  BORRADOR
+  CONFIRMADA
+}
+class "Excepciones que lanza" as Errores <<ErrorDominio>> {
+  DatoInvalidoError → 400
+  EvaluadorNoAsignadoError → 403
+  EvaluacionYaConfirmadaError → 409
+  RubricaNoEncontradaError → 422
+  RubricaSinCriteriosError → 422
+  PesosInvalidosError → 422
+  NotasIncompletasError → 422
+  TipoNotaInvalidoError → 422
+  NotaFueraDeRangoError → 422
+}
+note bottom of Rubrica
+  TOLERANCIA_PESOS = 1e-6
+  validar_nota: bool, str, None, NaN e ∞
+  → TipoNotaInvalidoError
+end note
+
+EvaluacionControlador --> CalificacionServicio : crea y llama
+CalificacionServicio ..> calificacion_validador : usa
+CalificacionServicio o--> EvaluacionRepositorio
+CalificacionServicio o--> RubricaRepositorio
+CalificacionServicio o--> Reloj
+RubricaRepositorio ..> Rubrica : devuelve
+EvaluacionRepositorio ..> Evaluacion : devuelve / guarda
+Rubrica "1" *-- "1..*" Criterio
+Evaluacion --> EstadoEvaluacion
+CalificacionServicio ..> Errores : lanza
+@enduml
