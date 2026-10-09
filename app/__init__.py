@@ -5,6 +5,7 @@ from pathlib import Path
 from flask import Flask, jsonify
 
 from app import db
+from app.controladores.usuario_controlador import usuarios_bp
 from app.dominio.errores import ErrorDominio
 
 
@@ -17,6 +18,7 @@ def create_app(config: dict | None = None) -> Flask:
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
     db.registrar_en(app)
+    app.register_blueprint(usuarios_bp)
 
     @app.errorhandler(ErrorDominio)
     def manejar_error_dominio(error: ErrorDominio):
