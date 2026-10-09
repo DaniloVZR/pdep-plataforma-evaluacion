@@ -1,0 +1,20 @@
+# Entornos y cachés
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Cobertura
+.coverage
+htmlcov/
+coverage.xml
+
+# Base de datos local de Flask
+instance/
+
+# Editores y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
