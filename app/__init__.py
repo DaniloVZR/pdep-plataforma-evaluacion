@@ -2,7 +2,10 @@
 
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, jsonify
+
+from app import db
+from app.dominio.errores import ErrorDominio
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -12,4 +15,12 @@ def create_app(config: dict | None = None) -> Flask:
     if config:
         app.config.update(config)
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
+
+    db.registrar_en(app)
+
+    @app.errorhandler(ErrorDominio)
+    def manejar_error_dominio(error: ErrorDominio):
+        """Convierte cualquier excepción del dominio en JSON con su código HTTP."""
+        return jsonify({"codigo": error.codigo, "mensaje": error.mensaje}), error.estado_http
+
     return app
