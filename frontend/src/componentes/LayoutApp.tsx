@@ -7,6 +7,7 @@ import { Marca } from './Marca.tsx'
 const MENU: Record<RolSesion, { a: string; texto: string }[]> = {
   ADMINISTRADOR: [
     { a: '/admin', texto: 'Panel' },
+    { a: '/usuarios/nuevo', texto: 'Registrar usuario' },
     { a: '/proyectos', texto: 'Proyectos' },
   ],
   EVALUADOR: [

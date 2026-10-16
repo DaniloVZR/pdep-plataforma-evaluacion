@@ -5,7 +5,12 @@ import { RequiereRol } from './componentes/RequiereRol.tsx'
 import { Landing } from './paginas/Landing.tsx'
 import { Login } from './paginas/Login.tsx'
 import { PanelAdmin } from './paginas/PanelAdmin.tsx'
-import { Pendiente } from './paginas/Pendiente.tsx'
+import { CalificarProyecto } from './paginas/CalificarProyecto.tsx'
+import { InscribirProyecto } from './paginas/InscribirProyecto.tsx'
+import { ListadoProyectos } from './paginas/ListadoProyectos.tsx'
+import { MisEvaluaciones } from './paginas/MisEvaluaciones.tsx'
+import { RegistrarUsuario } from './paginas/RegistrarUsuario.tsx'
+import './pantallas.css'
 
 function NoEncontrada() {
   return (
@@ -40,7 +45,7 @@ export default function App() {
           path="usuarios/nuevo"
           element={
             <RequiereRol roles={['ADMINISTRADOR']}>
-              <Pendiente titulo="Registrar usuario" historia="HU-003" />
+              <RegistrarUsuario />
             </RequiereRol>
           }
         />
@@ -48,7 +53,7 @@ export default function App() {
           path="proyectos/inscribir"
           element={
             <RequiereRol roles={['ESTUDIANTE']}>
-              <Pendiente titulo="Inscribir proyecto" historia="HU-005" />
+              <InscribirProyecto />
             </RequiereRol>
           }
         />
@@ -56,7 +61,7 @@ export default function App() {
           path="evaluaciones"
           element={
             <RequiereRol roles={['EVALUADOR']}>
-              <Pendiente titulo="Mis evaluaciones" historia="HU-007" />
+              <MisEvaluaciones />
             </RequiereRol>
           }
         />
@@ -64,7 +69,7 @@ export default function App() {
           path="evaluaciones/:proyectoId"
           element={
             <RequiereRol roles={['EVALUADOR']}>
-              <Pendiente titulo="Calificar proyecto" historia="HU-007" />
+              <CalificarProyecto />
             </RequiereRol>
           }
         />
@@ -72,7 +77,7 @@ export default function App() {
           path="proyectos"
           element={
             <RequiereRol roles={['ADMINISTRADOR', 'EVALUADOR', 'ESTUDIANTE']}>
-              <Pendiente titulo="Proyectos" historia="listado" />
+              <ListadoProyectos />
             </RequiereRol>
           }
         />
