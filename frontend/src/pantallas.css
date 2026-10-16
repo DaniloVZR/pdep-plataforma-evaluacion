@@ -1,0 +1,290 @@
+/* Estilos de las pantallas de HU-003, HU-005, HU-007 y el listado de proyectos.
+   Usan las variables de index.css para seguir la misma línea visual. */
+
+.pantalla {
+  max-width: 56rem;
+}
+
+/* ───────── Tarjeta de formulario ───────── */
+.tarjeta {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-grande);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(10, 61, 115, 0.06);
+}
+.tarjeta-subtitulo {
+  display: block;
+  font-weight: 700;
+  font-size: 0.925rem;
+  margin: 0 0 0.6rem;
+  padding: 0;
+}
+.tarjeta-subtitulo small,
+.texto-suave {
+  color: var(--texto-suave);
+  font-weight: 400;
+}
+.rejilla-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.25rem;
+}
+textarea {
+  resize: vertical;
+}
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--borde);
+}
+.boton svg {
+  flex-shrink: 0;
+}
+
+/* Selector de dos opciones (rol, modalidad) */
+.selector-segmentado {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--gris-claro);
+  border-radius: var(--radio);
+}
+.selector-segmentado label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+.selector-segmentado label.activo {
+  background: var(--blanco);
+  color: var(--azul);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.selector-segmentado input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.selector-segmentado label:has(input:focus-visible) {
+  outline: 3px solid rgba(10, 61, 115, 0.3);
+}
+
+/* Lista de casillas (asignaturas) */
+.opciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
+}
+.opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio);
+  cursor: pointer;
+  height: 100%;
+}
+.opcion:hover {
+  border-color: #aab5c3;
+}
+.opcion:has(input:checked) {
+  border-color: var(--azul);
+  background: var(--azul-tenue);
+}
+.opcion input {
+  margin-top: 0.2rem;
+  accent-color: var(--azul);
+}
+.opcion small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+/* ───────── Insignias ───────── */
+.insignia {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.insignia-gris { background: #eceff3; color: var(--texto-suave); }
+.insignia-verde { background: #e8f6ec; color: var(--verde-texto); }
+.insignia-roja { background: var(--rojo-fondo); color: var(--rojo-texto); }
+.insignia-naranja { background: #fff1e0; color: #a35600; }
+.insignia-azul { background: var(--azul-tenue); color: var(--azul); }
+
+.fila-icono {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ───────── Tablas ───────── */
+.tabla-contenedor {
+  overflow-x: auto;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-grande);
+}
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.tabla th {
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--texto-suave);
+  background: var(--gris-claro);
+  padding: 0.75rem 1rem;
+}
+.tabla td {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--borde);
+  vertical-align: middle;
+}
+.tabla .numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.celda-principal {
+  font-weight: 600;
+}
+.celda-detalle {
+  display: block;
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+.celda-accion {
+  text-align: right;
+  white-space: nowrap;
+}
+.celda-accion .boton {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.875rem;
+}
+
+.filtro {
+  max-width: 20rem;
+}
+.bienvenida-con-accion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* ───────── Calificación (HU-007) ───────── */
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  font-size: 0.925rem;
+  color: var(--texto-suave);
+  text-decoration: none;
+}
+.volver:hover {
+  color: var(--azul);
+}
+.criterios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.criterio {
+  display: grid;
+  grid-template-columns: 1fr 8rem;
+  align-items: start;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--borde);
+}
+.criterio:first-child {
+  border-top: 0;
+}
+.criterio-nombre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  padding-top: 0.6rem;
+}
+.criterio-nota {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.resultado {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.resultado-icono {
+  color: var(--verde);
+}
+.resultado-titulo {
+  font-weight: 700;
+  margin: 0.25rem 0 0;
+}
+.resultado-puntaje {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--azul);
+  margin: 0;
+}
+.resultado-puntaje small {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+.tabla-compacta {
+  max-width: 28rem;
+  margin: 1.25rem auto;
+  text-align: left;
+}
+.tabla-compacta caption {
+  caption-side: bottom;
+  padding-top: 0.5rem;
+  font-size: 0.85rem;
+}
+.tabla-compacta td,
+.tabla-compacta th {
+  padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 40rem) {
+  .rejilla-2 {
+    grid-template-columns: 1fr;
+  }
+  .tarjeta {
+    padding: 1.1rem;
+  }
+  .criterio {
+    grid-template-columns: 1fr 6.5rem;
+  }
+}
