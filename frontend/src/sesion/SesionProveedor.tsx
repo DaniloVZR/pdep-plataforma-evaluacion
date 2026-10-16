@@ -14,6 +14,7 @@ function leerSesionGuardada(): Sesion | null {
       typeof dato.rol === 'string' &&
       ROLES.includes(dato.rol) &&
       typeof dato.nombre === 'string' &&
+      typeof dato.cuenta === 'string' &&
       (dato.usuarioId === null || typeof dato.usuarioId === 'number')
     return valida ? (dato as Sesion) : null
   } catch {

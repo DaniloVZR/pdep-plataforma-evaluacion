@@ -1,12 +1,15 @@
 import { Link, Route, Routes } from 'react-router-dom'
-import { Layout } from './componentes/Layout.tsx'
+import { LayoutApp } from './componentes/LayoutApp.tsx'
+import { LayoutPublico } from './componentes/LayoutPublico.tsx'
 import { RequiereRol } from './componentes/RequiereRol.tsx'
-import { Inicio } from './paginas/Inicio.tsx'
+import { Landing } from './paginas/Landing.tsx'
+import { Login } from './paginas/Login.tsx'
+import { PanelAdmin } from './paginas/PanelAdmin.tsx'
 import { Pendiente } from './paginas/Pendiente.tsx'
 
 function NoEncontrada() {
   return (
-    <section>
+    <section className="pagina-simple">
       <h1>No encontramos esa página</h1>
       <p>
         <Link to="/">Volver al inicio</Link>
@@ -18,8 +21,21 @@ function NoEncontrada() {
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Inicio />} />
+      <Route element={<LayoutPublico />}>
+        <Route index element={<Landing />} />
+        <Route path="*" element={<NoEncontrada />} />
+      </Route>
+      <Route path="ingresar" element={<Login />} />
+
+      <Route element={<LayoutApp />}>
+        <Route
+          path="admin"
+          element={
+            <RequiereRol roles={['ADMINISTRADOR']}>
+              <PanelAdmin />
+            </RequiereRol>
+          }
+        />
         <Route
           path="usuarios/nuevo"
           element={
@@ -60,7 +76,6 @@ export default function App() {
             </RequiereRol>
           }
         />
-        <Route path="*" element={<NoEncontrada />} />
       </Route>
     </Routes>
   )

@@ -3,13 +3,17 @@ import { createContext, useContext } from 'react'
 export type RolSesion = 'ADMINISTRADOR' | 'EVALUADOR' | 'ESTUDIANTE'
 
 /**
- * Sesión simulada: el backend todavía no tiene inicio de sesión (RNF-03), así que
- * el frontend recuerda qué rol y qué usuario eligió la persona.
+ * Sesión simulada: el backend todavía no tiene inicio de sesión (RNF-03).
+ * Cuando exista, el rol saldrá de la cuenta y `Sesion` se llenará con la respuesta del login.
  */
 export interface Sesion {
+  /** Nombre de la cuenta que inició sesión (lo que se ve en "Bienvenido, ..."). */
+  cuenta: string
+  /** Vista activa. Con "Ver como" puede ser distinta del rol de la cuenta. */
   rol: RolSesion
-  /** null para el administrador, que no corresponde a un usuario registrado. */
+  /** Usuario del backend que se está simulando; null para el administrador. */
   usuarioId: number | null
+  /** Nombre de la persona de la vista activa. */
   nombre: string
 }
 
@@ -37,7 +41,7 @@ export const ETIQUETA_ROL: Record<RolSesion, string> = {
 
 /** Primera pantalla de cada rol después de entrar. */
 export const RUTA_INICIAL: Record<RolSesion, string> = {
-  ADMINISTRADOR: '/usuarios/nuevo',
+  ADMINISTRADOR: '/admin',
   EVALUADOR: '/evaluaciones',
   ESTUDIANTE: '/proyectos/inscribir',
 }
