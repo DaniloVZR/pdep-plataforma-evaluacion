@@ -57,10 +57,40 @@ curl -X PUT http://127.0.0.1:5000/api/proyectos/1/evaluacion -H "Content-Type: a
   -d '{"evaluador_id": 1, "notas": {"1": 4.0, "2": 3.0, "3": 5.0}, "confirmar": true}'
 ```
 
+## Endpoints de consulta para el frontend (PDEP-35)
+
+Solo lectura. No pasan por los servicios de las historias, así que el diseño de
+pruebas del RTF3 no cambia. Los errores siguen el formato `{"codigo", "mensaje"}`.
+
+| Endpoint | Devuelve | Uso en el frontend |
+|---|---|---|
+| `GET /api/programas` | Programas con sus asignaturas | Formulario de registro (HU-003) |
+| `GET /api/usuarios?rol=DOCENTE` | Usuarios; `rol` es opcional | Elegir el evaluador (HU-007) |
+| `GET /api/equipos` | Equipos con sus integrantes | Formulario de inscripción (HU-005) |
+| `GET /api/ferias` | Ferias con fechas y asignaturas participantes | Formulario de inscripción (HU-005) |
+| `GET /api/ferias/<id>/rubrica` | Escala y criterios con su peso (404 si no existe la feria, 422 si no tiene rúbrica) | Pantalla de calificación (HU-007) |
+| `GET /api/proyectos?feria_id=1` | Proyectos inscritos; `feria_id` es opcional | Listado de proyectos |
+| `GET /api/evaluaciones?evaluador_id=1` | Evaluaciones asignadas; el puntaje solo aparece si está CONFIRMADA (400 sin `evaluador_id`) | "Mis proyectos por calificar" (HU-007) |
+
+### Conectar el frontend (Vite) con la API
+
+Flask corre en el puerto 5000 y Vite en el 5173. Para que las rutas `/api/...` del
+frontend lleguen a Flask sin configurar CORS, se agrega un proxy en
+`frontend/vite.config.ts`:
+
+```ts
+export default defineConfig({
+  plugins: [react()],
+  server: { proxy: { '/api': 'http://127.0.0.1:5000' } },
+})
+```
+
+Con eso basta tener las dos terminales abiertas: `flask --app app run` y `npm run dev`.
+
 ## Pruebas y análisis estático
 
 ```bash
-coverage run -m pytest      # 123 pruebas
+coverage run -m pytest      # 139 pruebas
 coverage report             # cobertura de líneas y de ramas (branch = true)
 coverage html               # reporte navegable en htmlcov/index.html
 pylint app tests            # análisis estático
