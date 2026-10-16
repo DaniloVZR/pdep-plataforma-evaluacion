@@ -11,6 +11,8 @@ export interface ErrorRespuesta {
   mensaje: string
 }
 
+// ───────────── Escrituras ─────────────
+
 // HU-003 · POST /api/usuarios
 export interface SolicitudUsuario {
   nombres: string
@@ -65,4 +67,174 @@ export interface Evaluacion {
   /** Solo viene con valor cuando la evaluación está CONFIRMADA. */
   puntaje_final: number | null
   fecha_confirmacion: string | null // ISO 8601 con zona horaria
+}
+
+// HU-001 · POST /api/instituciones
+export interface SolicitudInstitucion {
+  nombre: string
+  nit: string
+  correo_contacto?: string
+  telefono?: string
+  /** Dominio del correo institucional (RN001), por ejemplo itm.edu.co. */
+  dominio?: string
+}
+
+export interface InstitucionCreada {
+  id: number
+  nombre: string
+  nit: string
+  correo_contacto: string
+  telefono: string
+  dominio: string
+}
+
+// HU-001 · POST /api/facultades y POST /api/departamentos
+export interface SolicitudUnidad {
+  institucion_id: number
+  nombre: string
+}
+
+/** Facultad o departamento (GET /api/facultades, GET /api/departamentos). */
+export interface Unidad {
+  id: number
+  institucion_id: number
+  nombre: string
+}
+
+// HU-001 · POST /api/programas (facultad, departamento o los dos)
+export interface SolicitudPrograma {
+  institucion_id: number
+  codigo: string
+  nombre: string
+  facultad_id?: number
+  departamento_id?: number
+}
+
+export interface ProgramaCreado {
+  id: number
+  institucion_id: number
+  codigo: string
+  nombre: string
+  facultad_id: number | null
+  departamento_id: number | null
+}
+
+// HU-006 · POST /api/proyectos/<id>/evaluadores
+export interface SolicitudAsignacion {
+  evaluador_ids: number[]
+}
+
+export interface Asignacion {
+  proyecto_id: number
+  asignados: { evaluacion_id: number; evaluador_id: number }[]
+}
+
+// ───────────── Consultas (GET, PDEP-35) ─────────────
+
+/** GET /api/instituciones */
+export interface Institucion {
+  id: number
+  nombre: string
+  nit: string
+  correo_contacto: string
+  telefono: string
+  dominios: string[]
+}
+
+export interface AsignaturaDePrograma {
+  id: number
+  codigo: string
+  nombre: string
+  semestre: number
+}
+
+/** GET /api/programas */
+export interface Programa {
+  id: number
+  codigo: string
+  nombre: string
+  institucion_id: number
+  facultad_id: number | null
+  departamento_id: number | null
+  asignaturas: AsignaturaDePrograma[]
+}
+
+/** GET /api/usuarios[?rol=] */
+export interface UsuarioResumen {
+  id: number
+  nombres: string
+  correo: string
+  rol: Rol
+  programa_id: number
+}
+
+/** GET /api/equipos */
+export interface Equipo {
+  id: number
+  nombre: string
+  integrantes: { id: number; nombres: string }[]
+}
+
+/** GET /api/ferias */
+export interface Feria {
+  id: number
+  nombre: string
+  fecha_inicio: string // AAAA-MM-DD
+  fecha_fin: string // AAAA-MM-DD
+  asignaturas: { id: number; codigo: string; nombre: string }[]
+}
+
+export interface Criterio {
+  id: number
+  nombre: string
+  /** Fracción entre 0 y 1; todos suman 1. */
+  peso: number
+}
+
+/** GET /api/ferias/<id>/rubrica */
+export interface Rubrica {
+  id: number
+  feria_id: number
+  nota_minima: number
+  nota_maxima: number
+  criterios: Criterio[]
+}
+
+/** GET /api/proyectos[?feria_id=] */
+export interface ProyectoListado {
+  id: number
+  nombre: string
+  descripcion: string
+  modalidad: Modalidad
+  fecha_inscripcion: string
+  feria_id: number
+  equipo_id: number
+  equipo: string
+  asignatura_ids: number[]
+  /** Evaluadores asignados al proyecto (HU-006). */
+  evaluadores: { id: number; nombres: string }[]
+}
+
+/** GET /api/evaluadores/carga (HU-006): proyectos asignados a cada docente. */
+export interface CargaEvaluador {
+  id: number
+  nombres: string
+  correo: string
+  asignados: number
+  pendientes: number
+  borradores: number
+  confirmadas: number
+}
+
+/** GET /api/evaluaciones?evaluador_id= */
+export interface EvaluacionAsignada {
+  evaluacion_id: number
+  proyecto_id: number
+  proyecto: string
+  feria_id: number
+  feria: string
+  estado: EstadoEvaluacion
+  /** Solo viene con valor cuando la evaluación está CONFIRMADA. */
+  puntaje_final: number | null
+  fecha_confirmacion: string | null
 }

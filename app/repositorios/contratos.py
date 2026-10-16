@@ -8,7 +8,18 @@ mismos contratos, así una prueba falla si llama a un método que no existe.
 
 from typing import Protocol
 
-from app.dominio.modelos import Evaluacion, Feria, Proyecto, Rubrica, Usuario
+from app.dominio.modelos import (
+    Asignacion,
+    Departamento,
+    Evaluacion,
+    Facultad,
+    Feria,
+    Institucion,
+    Programa,
+    Proyecto,
+    Rubrica,
+    Usuario,
+)
 
 
 class InstitucionRepositorio(Protocol):
@@ -89,3 +100,54 @@ class RubricaRepositorio(Protocol):
 
     def obtener_por_feria(self, feria_id: int) -> Rubrica | None:
         """La rúbrica de la feria con sus criterios, o ``None``."""
+
+
+class EstructuraRepositorio(Protocol):
+    """Acceso a la estructura académica: instituciones, facultades, departamentos y programas
+    (HU-001).
+
+    Los métodos ``guardar_*`` lanzan ``ConflictoUnicidadError`` si la base de datos rechaza
+    el registro por duplicado.
+    """
+
+    def existe_institucion(self, institucion_id: int) -> bool:
+        """``True`` si la institución existe."""
+
+    def institucion_de_facultad(self, facultad_id: int) -> int | None:
+        """Id de la institución de la facultad, o ``None`` si la facultad no existe."""
+
+    def institucion_de_departamento(self, departamento_id: int) -> int | None:
+        """Id de la institución del departamento, o ``None`` si no existe."""
+
+    def guardar_institucion(self, institucion: Institucion) -> Institucion:
+        """Inserta la institución y, si trae dominio, su dominio de correo."""
+
+    def guardar_facultad(self, facultad: Facultad) -> Facultad:
+        """Inserta la facultad."""
+
+    def guardar_departamento(self, departamento: Departamento) -> Departamento:
+        """Inserta el departamento."""
+
+    def guardar_programa(self, programa: Programa) -> Programa:
+        """Inserta el programa."""
+
+
+class AsignacionRepositorio(Protocol):
+    """Acceso a la asignación de evaluadores a proyectos (HU-006)."""
+
+    def existe_proyecto(self, proyecto_id: int) -> bool:
+        """``True`` si el proyecto existe."""
+
+    def roles_de_usuarios(self, usuario_ids: tuple[int, ...]) -> dict[int, str]:
+        """``{usuario_id: rol}`` de los usuarios que existen entre ``usuario_ids``."""
+
+    def evaluadores_asignados(self, proyecto_id: int) -> frozenset[int]:
+        """Ids de los evaluadores que ya tienen asignado el proyecto."""
+
+    def asignar(self, proyecto_id: int,
+                evaluador_ids: tuple[int, ...]) -> tuple[Asignacion, ...]:
+        """Crea una evaluación PENDIENTE por evaluador, todas en una sola transacción.
+
+        Lanza ``ConflictoUnicidadError`` si otra solicitud asignó el mismo evaluador
+        un instante antes (restricción UNIQUE de ``evaluacion``).
+        """

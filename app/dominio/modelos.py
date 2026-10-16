@@ -1,4 +1,4 @@
-"""Entidades del dominio que usan HU-003, HU-005 y HU-007.
+"""Entidades del dominio que usan HU-001, HU-003, HU-005, HU-006 y HU-007.
 
 Son ``dataclasses`` inmutables: no conocen la base de datos ni Flask, por lo
 que su lógica se prueba con objetos creados en memoria.
@@ -36,6 +36,48 @@ class EstadoEvaluacion(str, Enum):
     PENDIENTE = "PENDIENTE"     # creada al asignar el evaluador (HU-006)
     BORRADOR = "BORRADOR"       # tiene notas, pero el evaluador no la confirmó
     CONFIRMADA = "CONFIRMADA"   # cerrada: el puntaje es visible (RN007)
+
+
+@dataclass(frozen=True)
+class Institucion:
+    """Institución educativa (HU-001, REQ-1). ``dominio`` es el del correo institucional (RN001)."""
+
+    id: int | None
+    nombre: str
+    nit: str
+    correo_contacto: str = ""
+    telefono: str = ""
+    dominio: str = ""
+
+
+@dataclass(frozen=True)
+class Facultad:
+    """Facultad de una institución (HU-001, REQ-2)."""
+
+    id: int | None
+    institucion_id: int
+    nombre: str
+
+
+@dataclass(frozen=True)
+class Departamento:
+    """Departamento de una institución (HU-001, REQ-2)."""
+
+    id: int | None
+    institucion_id: int
+    nombre: str
+
+
+@dataclass(frozen=True)
+class Programa:
+    """Programa académico asociado a una facultad o a un departamento (HU-001, REQ-3)."""
+
+    id: int | None
+    institucion_id: int
+    codigo: str
+    nombre: str
+    facultad_id: int | None = None
+    departamento_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -133,6 +175,15 @@ class Rubrica:
             nota = self.validar_nota(notas[criterio.id])
             puntaje += nota * criterio.peso
         return round(puntaje, 2)
+
+
+@dataclass(frozen=True)
+class Asignacion:
+    """Evaluador asignado a un proyecto (HU-006). Crea la evaluación en estado PENDIENTE."""
+
+    evaluacion_id: int
+    proyecto_id: int
+    evaluador_id: int
 
 
 @dataclass(frozen=True)

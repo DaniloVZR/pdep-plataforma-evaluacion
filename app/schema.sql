@@ -16,14 +16,19 @@ DROP TABLE IF EXISTS usuario_asignatura;
 DROP TABLE IF EXISTS usuario;
 DROP TABLE IF EXISTS asignatura;
 DROP TABLE IF EXISTS programa;
+DROP TABLE IF EXISTS departamento;
+DROP TABLE IF EXISTS facultad;
 DROP TABLE IF EXISTS dominio_institucion;
 DROP TABLE IF EXISTS institucion;
 
+-- HU-001 · REQ-1: nombre, identificación (NIT) y datos de contacto.
 CREATE TABLE institucion (
-    id      INTEGER PRIMARY KEY,
-    nombre  TEXT NOT NULL,
-    nit     TEXT NOT NULL UNIQUE,
-    activa  INTEGER NOT NULL DEFAULT 1 CHECK (activa IN (0, 1))
+    id               INTEGER PRIMARY KEY,
+    nombre           TEXT NOT NULL,
+    nit              TEXT NOT NULL UNIQUE,
+    correo_contacto  TEXT NOT NULL DEFAULT '',
+    telefono         TEXT NOT NULL DEFAULT '',
+    activa           INTEGER NOT NULL DEFAULT 1 CHECK (activa IN (0, 1))
 );
 
 CREATE TABLE dominio_institucion (
@@ -32,11 +37,33 @@ CREATE TABLE dominio_institucion (
     PRIMARY KEY (institucion_id, dominio)
 );
 
-CREATE TABLE programa (
+-- HU-001 · REQ-2: facultades y departamentos asociados a una institución.
+-- Una institución no puede tener dos facultades (o dos departamentos) con el mismo nombre;
+-- COLLATE NOCASE compara sin distinguir mayúsculas ("Artes" = "ARTES"); SQLite solo lo hace
+-- con letras sin tilde, así que "í" e "Í" siguen contando como distintas.
+CREATE TABLE facultad (
     id              INTEGER PRIMARY KEY,
     institucion_id  INTEGER NOT NULL REFERENCES institucion (id),
-    codigo          TEXT NOT NULL UNIQUE,
-    nombre          TEXT NOT NULL
+    nombre          TEXT NOT NULL COLLATE NOCASE,
+    UNIQUE (institucion_id, nombre)
+);
+
+CREATE TABLE departamento (
+    id              INTEGER PRIMARY KEY,
+    institucion_id  INTEGER NOT NULL REFERENCES institucion (id),
+    nombre          TEXT NOT NULL COLLATE NOCASE,
+    UNIQUE (institucion_id, nombre)
+);
+
+-- HU-001 · REQ-3: el programa se asocia a una facultad o a un departamento.
+-- Las dos columnas aceptan NULL para no romper los programas que ya existían.
+CREATE TABLE programa (
+    id               INTEGER PRIMARY KEY,
+    institucion_id   INTEGER NOT NULL REFERENCES institucion (id),
+    facultad_id      INTEGER REFERENCES facultad (id),
+    departamento_id  INTEGER REFERENCES departamento (id),
+    codigo           TEXT NOT NULL UNIQUE,
+    nombre           TEXT NOT NULL
 );
 
 CREATE TABLE asignatura (

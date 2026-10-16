@@ -5,7 +5,9 @@ from pathlib import Path
 from flask import Flask, jsonify
 
 from app import db
+from app.controladores.asignacion_controlador import asignaciones_bp
 from app.controladores.consulta_controlador import consultas_bp
+from app.controladores.estructura_controlador import estructura_bp
 from app.controladores.evaluacion_controlador import evaluaciones_bp
 from app.controladores.proyecto_controlador import proyectos_bp
 from app.controladores.usuario_controlador import usuarios_bp
@@ -25,6 +27,8 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(proyectos_bp)
     app.register_blueprint(evaluaciones_bp)
     app.register_blueprint(consultas_bp)
+    app.register_blueprint(estructura_bp)
+    app.register_blueprint(asignaciones_bp)
 
     @app.errorhandler(ErrorDominio)
     def manejar_error_dominio(error: ErrorDominio):

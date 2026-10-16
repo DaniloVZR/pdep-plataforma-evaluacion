@@ -18,7 +18,8 @@ def _agrupar(filas: list[sqlite3.Row], clave: str, campos: tuple[str, ...]) -> d
 
 
 class SqliteConsultaRepositorio:
-    """Listados de programas, usuarios, equipos, ferias, rúbricas, proyectos y evaluaciones."""
+    """Listados de la estructura académica, usuarios, equipos, ferias, rúbricas, proyectos y
+    evaluaciones."""
 
     def __init__(self, conexion: sqlite3.Connection) -> None:
         self._conexion = conexion
@@ -33,10 +34,32 @@ class SqliteConsultaRepositorio:
                         "ORDER BY semestre, nombre"),
             "programa_id", ("id", "codigo", "nombre", "semestre"))
         return [
-            {"id": p["id"], "codigo": p["codigo"], "nombre": p["nombre"],
-             "asignaturas": asignaturas[p["id"]]}
-            for p in self._filas("SELECT id, codigo, nombre FROM programa ORDER BY nombre")
+            {**dict(p), "asignaturas": asignaturas[p["id"]]}
+            for p in self._filas("SELECT id, codigo, nombre, institucion_id, facultad_id, "
+                                 "departamento_id FROM programa ORDER BY nombre")
         ]
+
+    def listar_instituciones(self) -> list[dict]:
+        """Instituciones con sus datos de contacto y dominios de correo (HU-001)."""
+        dominios = _agrupar(
+            self._filas("SELECT institucion_id, dominio FROM dominio_institucion "
+                        "ORDER BY dominio"),
+            "institucion_id", ("dominio",))
+        return [
+            {**dict(i), "dominios": [d["dominio"] for d in dominios[i["id"]]]}
+            for i in self._filas("SELECT id, nombre, nit, correo_contacto, telefono "
+                                 "FROM institucion ORDER BY nombre")
+        ]
+
+    def listar_unidades(self, tabla: str, institucion_id: int | None) -> list[dict]:
+        """Facultades o departamentos (``tabla``); si ``institucion_id`` no es ``None``,
+        solo los de esa institución (HU-001)."""
+        sql = f"SELECT id, institucion_id, nombre FROM {tabla}"
+        parametros: tuple = ()
+        if institucion_id is not None:
+            sql += " WHERE institucion_id = ?"
+            parametros = (institucion_id,)
+        return [dict(fila) for fila in self._filas(sql + " ORDER BY nombre", parametros)]
 
     def listar_usuarios(self, rol: str | None) -> list[dict]:
         """Usuarios registrados; si ``rol`` no es ``None``, solo los de ese rol."""
@@ -89,7 +112,8 @@ class SqliteConsultaRepositorio:
                 "criterios": [dict(c) for c in criterios]}
 
     def listar_proyectos(self, feria_id: int | None) -> list[dict]:
-        """Proyectos inscritos con sus asignaturas; si ``feria_id`` no es ``None``, de esa feria."""
+        """Proyectos con sus asignaturas y evaluadores; si ``feria_id`` no es ``None``, de esa
+        feria."""
         sql = ("SELECT p.id, p.nombre, p.descripcion, p.modalidad, p.fecha_inscripcion, "
                "p.feria_id, p.equipo_id, e.nombre AS equipo FROM proyecto p "
                "JOIN equipo e ON e.id = p.equipo_id")
@@ -101,10 +125,28 @@ class SqliteConsultaRepositorio:
             self._filas("SELECT proyecto_id, asignatura_id FROM proyecto_asignatura "
                         "ORDER BY asignatura_id"),
             "proyecto_id", ("asignatura_id",))
+        evaluadores = _agrupar(
+            self._filas("SELECT ev.proyecto_id, u.id, u.nombres FROM evaluacion ev "
+                        "JOIN usuario u ON u.id = ev.evaluador_id ORDER BY u.nombres"),
+            "proyecto_id", ("id", "nombres"))
         return [
-            {**dict(p), "asignatura_ids": [a["asignatura_id"] for a in asignaturas[p["id"]]]}
+            {**dict(p), "asignatura_ids": [a["asignatura_id"] for a in asignaturas[p["id"]]],
+             "evaluadores": evaluadores[p["id"]]}
             for p in self._filas(sql + " ORDER BY p.id", parametros)
         ]
+
+    def listar_carga_evaluadores(self) -> list[dict]:
+        """Docentes con la cantidad de proyectos asignados y su estado (HU-006).
+
+        Los docentes sin asignaciones aparecen con 0, para ver a quién repartir.
+        """
+        return [dict(fila) for fila in self._filas(
+            "SELECT u.id, u.nombres, u.correo, COUNT(ev.id) AS asignados, "
+            "COALESCE(SUM(ev.estado = 'PENDIENTE'), 0) AS pendientes, "
+            "COALESCE(SUM(ev.estado = 'BORRADOR'), 0) AS borradores, "
+            "COALESCE(SUM(ev.estado = 'CONFIRMADA'), 0) AS confirmadas "
+            "FROM usuario u LEFT JOIN evaluacion ev ON ev.evaluador_id = u.id "
+            "WHERE u.rol = 'DOCENTE' GROUP BY u.id ORDER BY asignados DESC, u.nombres")]
 
     def listar_evaluaciones(self, evaluador_id: int) -> list[dict]:
         """Evaluaciones asignadas al evaluador. El puntaje solo se incluye si está confirmada."""

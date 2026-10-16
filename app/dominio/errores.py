@@ -63,6 +63,36 @@ class RubricaNoEncontradaError(RecursoNoEncontradoError):
     estado_http = 422
 
 
+class InstitucionNoEncontradaError(RecursoNoEncontradoError):
+    """La institución indicada no existe (HU-001)."""
+
+    codigo = "institucion_no_encontrada"
+
+
+class FacultadNoEncontradaError(RecursoNoEncontradoError):
+    """La facultad indicada no existe (HU-001)."""
+
+    codigo = "facultad_no_encontrada"
+
+
+class DepartamentoNoEncontradoError(RecursoNoEncontradoError):
+    """El departamento indicado no existe (HU-001)."""
+
+    codigo = "departamento_no_encontrado"
+
+
+class ProyectoNoEncontradoError(RecursoNoEncontradoError):
+    """El proyecto indicado no existe (HU-006)."""
+
+    codigo = "proyecto_no_encontrado"
+
+
+class EvaluadorNoEncontradoError(RecursoNoEncontradoError):
+    """Uno o más evaluadores indicados no existen (HU-006)."""
+
+    codigo = "evaluador_no_encontrado"
+
+
 class ReglaNegocioError(ErrorDominio):
     """Base de los errores por reglas de negocio incumplidas."""
 
@@ -124,6 +154,18 @@ class NotaFueraDeRangoError(ReglaNegocioError):
     codigo = "nota_fuera_de_rango"
 
 
+class EstructuraInconsistenteError(ReglaNegocioError):
+    """La facultad o el departamento del programa son de otra institución (HU-001)."""
+
+    codigo = "estructura_inconsistente"
+
+
+class UsuarioNoDocenteError(ReglaNegocioError):
+    """Solo un docente puede ser evaluador; se indicó un estudiante (HU-006)."""
+
+    codigo = "usuario_no_docente"
+
+
 class ConflictoError(ErrorDominio):
     """Base de los errores por registros duplicados o estados que no permiten el cambio."""
 
@@ -147,6 +189,36 @@ class EvaluacionYaConfirmadaError(ConflictoError):
     """La evaluación ya fue confirmada y no se puede modificar (RN007)."""
 
     codigo = "evaluacion_confirmada"
+
+
+class InstitucionDuplicadaError(ConflictoError):
+    """Ya existe una institución con el mismo NIT o el mismo dominio de correo (HU-001)."""
+
+    codigo = "institucion_duplicada"
+
+
+class FacultadDuplicadaError(ConflictoError):
+    """La institución ya tiene una facultad con ese nombre (HU-001)."""
+
+    codigo = "facultad_duplicada"
+
+
+class DepartamentoDuplicadoError(ConflictoError):
+    """La institución ya tiene un departamento con ese nombre (HU-001)."""
+
+    codigo = "departamento_duplicado"
+
+
+class ProgramaDuplicadoError(ConflictoError):
+    """Ya existe un programa con ese código (HU-001)."""
+
+    codigo = "programa_duplicado"
+
+
+class EvaluadorYaAsignadoError(ConflictoError):
+    """El evaluador ya está asignado a ese proyecto (HU-006, REQ-12)."""
+
+    codigo = "evaluador_ya_asignado"
 
 
 class EvaluadorNoAsignadoError(ErrorDominio):
