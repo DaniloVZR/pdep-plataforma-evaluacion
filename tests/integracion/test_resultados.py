@@ -54,6 +54,15 @@ def test_el_evaluador_ve_su_propia_retroalimentacion_en_borrador(cliente):
     assert propia["retroalimentacion"] == "Buen trabajo; falta documentar las pruebas."
 
 
+def test_el_evaluador_recupera_las_notas_del_borrador(cliente):
+    """Antes de calificar no hay notas; tras el borrador vuelven por criterio para llenar el
+    formulario."""
+    url = "/api/evaluaciones?evaluador_id=1"
+    assert cliente.get(url).get_json()[0]["notas"] == {}
+    calificar(cliente, confirmar=False)
+    assert cliente.get(url).get_json()[0]["notas"] == {"1": 4.0, "2": 3.0, "3": 5.0}
+
+
 def test_retroalimentacion_que_no_es_texto_responde_400(cliente):
     """HU-007 rechaza ``retroalimentacion`` numérica y no guarda nada."""
     respuesta = cliente.put("/api/proyectos/1/evaluacion", json={

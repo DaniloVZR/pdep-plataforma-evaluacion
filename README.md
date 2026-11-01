@@ -139,7 +139,7 @@ Con eso basta tener las dos terminales abiertas: `flask --app app run` y `npm ru
 ## Pruebas y análisis estático
 
 ```bash
-coverage run -m pytest      # 309 pruebas
+coverage run -m pytest      # 310 pruebas
 coverage report             # cobertura de líneas y de ramas (branch = true)
 coverage html               # reporte navegable en htmlcov/index.html
 pylint app tests            # análisis estático

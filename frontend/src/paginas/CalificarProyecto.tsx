@@ -84,7 +84,12 @@ interface PropsFormulario {
 function FormularioRubrica({ rubrica, asignada, evaluadorId }: PropsFormulario) {
   const id = useId()
   const { nota_minima: minima, nota_maxima: maxima } = rubrica
-  const [notas, setNotas] = useState<Record<number, string>>({})
+  // Si había un borrador, el formulario arranca con las notas que ya se habían guardado.
+  const [notas, setNotas] = useState<Record<number, string>>(() =>
+    Object.fromEntries(
+      Object.entries(asignada.notas ?? {}).map(([criterioId, nota]) => [criterioId, String(nota)]),
+    ),
+  )
   // HU-009: si había un borrador, se recupera el comentario que ya se había escrito.
   const [retroalimentacion, setRetroalimentacion] = useState(asignada.retroalimentacion ?? '')
   const [intentado, setIntentado] = useState(false)

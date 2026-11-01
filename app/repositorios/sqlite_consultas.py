@@ -167,7 +167,14 @@ class SqliteConsultaRepositorio:
 
     def listar_evaluaciones(self, evaluador_id: int) -> list[dict]:
         """Evaluaciones asignadas al evaluador. El puntaje solo se incluye si está confirmada;
-        la retroalimentación es del propio evaluador, así que la ve también en borrador."""
+        las notas por criterio y la retroalimentación son del propio evaluador, así que las ve
+        también en borrador para seguir calificando donde iba."""
+        notas = _agrupar(
+            self._filas("SELECT cc.evaluacion_id, cc.criterio_id, cc.nota "
+                        "FROM calificacion_criterio cc "
+                        "JOIN evaluacion ev ON ev.id = cc.evaluacion_id "
+                        "WHERE ev.evaluador_id = ?", (evaluador_id,)),
+            "evaluacion_id", ("criterio_id", "nota"))
         filas = self._filas(
             "SELECT ev.id AS evaluacion_id, ev.proyecto_id, p.nombre AS proyecto, p.feria_id, "
             "f.nombre AS feria, ev.estado, ev.puntaje_final, ev.fecha_confirmacion, "
@@ -177,6 +184,7 @@ class SqliteConsultaRepositorio:
             (evaluador_id,))
         return [
             {**dict(f), "puntaje_final": f["puntaje_final"] if f["estado"] == "CONFIRMADA"
-             else None}
+             else None,
+             "notas": {str(n["criterio_id"]): n["nota"] for n in notas[f["evaluacion_id"]]}}
             for f in filas
         ]

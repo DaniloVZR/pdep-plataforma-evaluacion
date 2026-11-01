@@ -298,6 +298,8 @@ export interface EvaluacionAsignada {
   fecha_confirmacion: string | null
   /** Comentario del propio evaluador (también en borrador). */
   retroalimentacion: string
+  /** Notas guardadas por criterio (clave: id del criterio); vacío si aún no calificó. */
+  notas: Record<string, number>
 }
 
 /** Evaluación de un proyecto tal como la ve el estudiante (HU-009, RN007). */
