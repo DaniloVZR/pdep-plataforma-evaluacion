@@ -2,6 +2,8 @@
 import { api } from './cliente'
 import type {
   Asignacion,
+  AsignaturaCreada,
+  AsignaturaListada,
   CargaEvaluador,
   Equipo,
   Evaluacion,
@@ -15,9 +17,11 @@ import type {
   Proyecto,
   ProyectoListado,
   RespuestaLogin,
+  ResultadoProyecto,
   Rol,
   Rubrica,
   SolicitudAsignacion,
+  SolicitudAsignatura,
   SolicitudCalificacion,
   SolicitudFeria,
   SolicitudInstitucion,
@@ -56,6 +60,10 @@ export const registrarDepartamento = (datos: SolicitudUnidad) =>
 export const registrarPrograma = (datos: SolicitudPrograma) =>
   api.post<ProgramaCreado>('/api/programas', datos)
 
+/** HU-002 · Registrar una asignatura asociada a un programa académico (REQ-4). */
+export const registrarAsignatura = (datos: SolicitudAsignatura) =>
+  api.post<AsignaturaCreada>('/api/asignaturas', datos)
+
 /** HU-003 · Registrar un estudiante o docente. */
 export const registrarUsuario = (datos: SolicitudUsuario) =>
   api.post<Usuario>('/api/usuarios', datos)
@@ -84,6 +92,10 @@ export const listarDepartamentos = (institucionId: number) =>
 
 export const listarProgramas = () => api.get<Programa[]>('/api/programas')
 
+/** HU-002 · Asignaturas de un programa; 404 si el programa no existe. */
+export const listarAsignaturas = (programaId: number) =>
+  api.get<AsignaturaListada[]>(`/api/asignaturas?programa_id=${programaId}`)
+
 export const listarUsuarios = (rol?: Rol) =>
   api.get<UsuarioResumen[]>(rol ? `/api/usuarios?rol=${rol}` : '/api/usuarios')
 
@@ -103,3 +115,7 @@ export const listarEvaluaciones = (evaluadorId: number) =>
 
 /** HU-006 · Cantidad de proyectos asignados a cada docente. */
 export const listarCargaEvaluadores = () => api.get<CargaEvaluador[]>('/api/evaluadores/carga')
+
+/** HU-009 · Proyectos del estudiante; puntaje y retroalimentación solo si está confirmada. */
+export const consultarResultados = (estudianteId: number) =>
+  api.get<ResultadoProyecto[]>(`/api/resultados?estudiante_id=${estudianteId}`)

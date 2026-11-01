@@ -8,12 +8,14 @@ import { Ferias } from './paginas/Ferias.tsx'
 import { PanelAdmin } from './paginas/PanelAdmin.tsx'
 import { Programas } from './paginas/Programas.tsx'
 import { AsignarEvaluadores } from './paginas/AsignarEvaluadores.tsx'
+import { Asignaturas } from './paginas/Asignaturas.tsx'
 import { CalificarProyecto } from './paginas/CalificarProyecto.tsx'
 import { FacultadesDepartamentos } from './paginas/FacultadesDepartamentos.tsx'
 import { Instituciones } from './paginas/Instituciones.tsx'
 import { InscribirProyecto } from './paginas/InscribirProyecto.tsx'
 import { ListadoProyectos } from './paginas/ListadoProyectos.tsx'
 import { MisEvaluaciones } from './paginas/MisEvaluaciones.tsx'
+import { MisResultados } from './paginas/MisResultados.tsx'
 import { RegistrarUsuario } from './paginas/RegistrarUsuario.tsx'
 import './pantallas.css'
 
@@ -72,6 +74,14 @@ export default function App() {
           }
         />
         <Route
+          path="estructura/asignaturas"
+          element={
+            <RequiereRol roles={['ADMINISTRADOR']}>
+              <Asignaturas />
+            </RequiereRol>
+          }
+        />
+        <Route
           path="asignaciones"
           element={
             <RequiereRol roles={['ADMINISTRADOR']}>
@@ -100,6 +110,14 @@ export default function App() {
           element={
             <RequiereRol roles={['ESTUDIANTE']}>
               <InscribirProyecto />
+            </RequiereRol>
+          }
+        />
+        <Route
+          path="resultados"
+          element={
+            <RequiereRol roles={['ESTUDIANTE']}>
+              <MisResultados />
             </RequiereRol>
           }
         />

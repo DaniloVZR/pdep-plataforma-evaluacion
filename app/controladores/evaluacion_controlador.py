@@ -34,4 +34,5 @@ def calificar_proyecto(proyecto_id: int):
         "estado": evaluacion.estado.value,
         "puntaje_final": evaluacion.puntaje_visible,
         "fecha_confirmacion": fecha.isoformat() if fecha else None,
+        "retroalimentacion": evaluacion.retroalimentacion,
     }), 200

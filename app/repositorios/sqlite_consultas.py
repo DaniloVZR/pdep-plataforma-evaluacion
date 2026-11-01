@@ -39,6 +39,22 @@ class SqliteConsultaRepositorio:
                                  "departamento_id FROM programa ORDER BY nombre")
         ]
 
+    def existe_programa(self, programa_id: int) -> bool:
+        """``True`` si el programa existe."""
+        return bool(self._filas("SELECT 1 FROM programa WHERE id = ?", (programa_id,)))
+
+    def listar_asignaturas(self, programa_id: int | None) -> list[dict]:
+        """Asignaturas con su programa; si ``programa_id`` no es ``None``, solo las de ese
+        programa (HU-002)."""
+        sql = ("SELECT a.id, a.programa_id, p.nombre AS programa, a.codigo, a.nombre, "
+               "a.semestre FROM asignatura a JOIN programa p ON p.id = a.programa_id")
+        parametros: tuple = ()
+        if programa_id is not None:
+            sql += " WHERE a.programa_id = ?"
+            parametros = (programa_id,)
+        return [dict(fila) for fila in
+                self._filas(sql + " ORDER BY a.semestre, a.nombre", parametros)]
+
     def listar_instituciones(self) -> list[dict]:
         """Instituciones con sus datos de contacto y dominios de correo (HU-001)."""
         dominios = _agrupar(
@@ -150,10 +166,12 @@ class SqliteConsultaRepositorio:
             "WHERE u.rol = 'DOCENTE' GROUP BY u.id ORDER BY asignados DESC, u.nombres")]
 
     def listar_evaluaciones(self, evaluador_id: int) -> list[dict]:
-        """Evaluaciones asignadas al evaluador. El puntaje solo se incluye si está confirmada."""
+        """Evaluaciones asignadas al evaluador. El puntaje solo se incluye si está confirmada;
+        la retroalimentación es del propio evaluador, así que la ve también en borrador."""
         filas = self._filas(
             "SELECT ev.id AS evaluacion_id, ev.proyecto_id, p.nombre AS proyecto, p.feria_id, "
-            "f.nombre AS feria, ev.estado, ev.puntaje_final, ev.fecha_confirmacion "
+            "f.nombre AS feria, ev.estado, ev.puntaje_final, ev.fecha_confirmacion, "
+            "ev.retroalimentacion "
             "FROM evaluacion ev JOIN proyecto p ON p.id = ev.proyecto_id "
             "JOIN feria f ON f.id = p.feria_id WHERE ev.evaluador_id = ? ORDER BY ev.id",
             (evaluador_id,))

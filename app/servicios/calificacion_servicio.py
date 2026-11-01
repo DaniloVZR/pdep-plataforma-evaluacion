@@ -9,6 +9,7 @@ from app.dominio.modelos import EstadoEvaluacion, Evaluacion
 from app.repositorios.contratos import EvaluacionRepositorio, RubricaRepositorio
 from app.servicios.reloj import Reloj
 from app.validadores.calificacion_validador import (
+    leer_retroalimentacion,
     validar_notas_completas,
     validar_rubrica,
     validar_solicitud_calificacion,
@@ -31,6 +32,7 @@ class CalificacionServicio:
         datos dentro del ciclo (RNF-01).
         """
         evaluador_id, notas, confirmar = validar_solicitud_calificacion(datos)   # D1
+        retroalimentacion = leer_retroalimentacion(datos)                        # HU-009
         evaluacion = self._evaluacion_repo.obtener_asignada(evaluador_id, proyecto_id)
         if evaluacion is None:                                                   # D2
             raise EvaluadorNoAsignadoError("El evaluador no tiene asignado este proyecto.")
@@ -45,5 +47,6 @@ class CalificacionServicio:
         notas_validas = {criterio_id: float(nota) for criterio_id, nota in notas.items()}
         calificada = evaluacion.con_calificacion(notas_validas, puntaje,
                                                  confirmada=confirmar,           # D11
-                                                 momento=self._reloj.ahora())
+                                                 momento=self._reloj.ahora(),
+                                                 retroalimentacion=retroalimentacion)
         return self._evaluacion_repo.guardar_calificacion(calificada)
