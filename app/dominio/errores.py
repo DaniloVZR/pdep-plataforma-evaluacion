@@ -228,6 +228,16 @@ class EvaluadorNoAsignadoError(ErrorDominio):
     estado_http = 403
 
 
+class CredencialesInvalidasError(ErrorDominio):
+    """El correo no tiene cuenta o la contraseña no coincide (RNF-03).
+
+    Se usa el mismo error en los dos casos para no revelar qué correos tienen cuenta.
+    """
+
+    codigo = "credenciales_invalidas"
+    estado_http = 401
+
+
 class ErrorPersistencia(ErrorDominio):
     """Falla inesperada de la base de datos. La operación se deshizo."""
 

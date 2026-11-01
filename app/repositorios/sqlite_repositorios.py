@@ -16,6 +16,7 @@ from app.dominio.errores import ConflictoUnicidadError, ErrorPersistencia
 from app.dominio.modelos import (
     Asignacion,
     Criterio,
+    Cuenta,
     Departamento,
     EstadoEvaluacion,
     Evaluacion,
@@ -24,6 +25,7 @@ from app.dominio.modelos import (
     Institucion,
     Programa,
     Proyecto,
+    RolCuenta,
     Rubrica,
     Usuario,
 )
@@ -375,3 +377,26 @@ class SqliteAsignacionRepositorio:
                     (proyecto_id, evaluador_id))
                 asignaciones.append(Asignacion(cursor.lastrowid, proyecto_id, evaluador_id))
         return tuple(asignaciones)
+
+
+class SqliteCuentaRepositorio:
+    """Cuentas de acceso (RNF-03). Solo lectura: las cuentas se cargan con los datos de prueba."""
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def buscar_por_correo(self, correo: str) -> Cuenta | None:
+        """Cuenta del correo con el nombre del usuario; el administrador no tiene usuario."""
+        fila = self._conexion.execute(
+            """
+            SELECT c.correo, c.clave, c.rol, c.usuario_id,
+                   COALESCE(u.nombres, 'Administración') AS nombre
+            FROM cuenta c LEFT JOIN usuario u ON u.id = c.usuario_id
+            WHERE c.correo = ?
+            """,
+            (correo,),
+        ).fetchone()
+        if fila is None:
+            return None
+        return Cuenta(fila["correo"], fila["clave"], RolCuenta(fila["rol"]),
+                      fila["usuario_id"], fila["nombre"])

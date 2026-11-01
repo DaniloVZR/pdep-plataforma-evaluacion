@@ -10,6 +10,7 @@ from typing import Protocol
 
 from app.dominio.modelos import (
     Asignacion,
+    Cuenta,
     Departamento,
     Evaluacion,
     Facultad,
@@ -151,3 +152,10 @@ class AsignacionRepositorio(Protocol):
         Lanza ``ConflictoUnicidadError`` si otra solicitud asignó el mismo evaluador
         un instante antes (restricción UNIQUE de ``evaluacion``).
         """
+
+
+class CuentaRepositorio(Protocol):
+    """Cuentas de acceso a la plataforma (RNF-03)."""
+
+    def buscar_por_correo(self, correo: str) -> Cuenta | None:
+        """Cuenta del correo (ya normalizado) con el nombre de su usuario, o ``None``."""

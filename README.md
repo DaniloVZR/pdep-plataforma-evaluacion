@@ -51,9 +51,27 @@ flask --app app init-db --demo   # crea instance/pdep.sqlite3 con datos de ejemp
 flask --app app run              # http://127.0.0.1:5000
 ```
 
+### Cuentas de prueba (RNF-03)
+
+`init-db --demo` crea una cuenta por rol para entrar a la aplicación. Las claves van en
+texto plano porque es un prototipo académico; no use contraseñas reales.
+
+| Rol | Correo | Clave |
+|---|---|---|
+| Administrador | `admin@pascualbravo.edu.co` | `admin123` |
+| Evaluador (docente 1) | `evaluador@pascualbravo.edu.co` | `evaluador123` |
+| Estudiante (usuario 2, Equipo Demo) | `estudiante@pascualbravo.edu.co` | `estudiante123` |
+
+`POST /api/login` con `{"correo", "clave"}` responde 200 con `{"usuario_id", "nombre", "rol"}`,
+400 si falta un dato y 401 si el correo o la clave no coinciden. Las cuentas están en la tabla
+`cuenta`, separada de `usuario`, así que el registro de HU-003 no cambia.
+
 Ejemplos con los datos de demostración:
 
 ```bash
+curl -X POST http://127.0.0.1:5000/api/login -H "Content-Type: application/json" \
+  -d '{"correo": "admin@pascualbravo.edu.co", "clave": "admin123"}'
+
 curl -X POST http://127.0.0.1:5000/api/usuarios -H "Content-Type: application/json" \
   -d '{"nombres": "Ana", "correo": "ana@pascualbravo.edu.co", "rol": "ESTUDIANTE", "programa_id": 1, "asignatura_ids": [1]}'
 
