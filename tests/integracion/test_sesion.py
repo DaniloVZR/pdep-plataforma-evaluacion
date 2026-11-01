@@ -23,10 +23,13 @@ from app.repositorios.sqlite_repositorios import SqliteCuentaRepositorio
                  id="estudiante"),
 ])
 def test_cada_cuenta_de_prueba_entra_con_su_rol(cliente, correo, clave, esperado):
-    """200 con el usuario, el nombre y el rol que necesita la sesión del frontend."""
+    """200 con el usuario, el nombre, el rol y el token que necesita la sesión del frontend."""
     respuesta = cliente.post("/api/login", json={"correo": correo, "clave": clave})
     assert respuesta.status_code == 200
-    assert respuesta.get_json() == esperado
+    cuerpo = respuesta.get_json()
+    token = cuerpo.pop("token")
+    assert isinstance(token, str) and token
+    assert cuerpo == esperado
 
 
 def test_clave_incorrecta_responde_401(cliente):

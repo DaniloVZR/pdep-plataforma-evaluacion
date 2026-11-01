@@ -18,7 +18,15 @@ export interface Sesion {
   usuarioId: number | null
   /** Nombre de la persona de la vista activa. */
   nombre: string
+  /** Token de `POST /api/login`; el cliente lo envía en cada petición (PDEP-47). */
+  token: string
 }
+
+/** Dónde se guarda la sesión en el navegador. La lee también `api/cliente.ts`. */
+export const CLAVE_SESION = 'pdep.sesion'
+
+/** Evento que lanza el cliente cuando el servidor dice que la sesión ya no sirve. */
+export const EVENTO_SESION_VENCIDA = 'pdep:sesion-vencida'
 
 export interface SesionContexto {
   sesion: Sesion | null

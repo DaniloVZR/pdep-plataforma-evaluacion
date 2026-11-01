@@ -16,8 +16,15 @@ from app.dominio.errores import (
 )
 from app.dominio.modelos import Rol
 from app.repositorios.sqlite_consultas import SqliteConsultaRepositorio
+from app.seguridad import exigir_mismo_usuario, exigir_rol
 
 consultas_bp = Blueprint("consultas", __name__, url_prefix="/api")
+
+
+@consultas_bp.before_request
+def _exigir_sesion():
+    """Las listas solo las ve quien inició sesión, con cualquier rol (PDEP-47)."""
+    exigir_rol()
 
 
 def _repositorio() -> SqliteConsultaRepositorio:
@@ -120,4 +127,6 @@ def listar_carga_evaluadores():
 @consultas_bp.get("/evaluaciones")
 def listar_evaluaciones():
     """Evaluaciones asignadas a ``?evaluador_id=`` (obligatorio)."""
-    return jsonify(_repositorio().listar_evaluaciones(_entero_positivo("evaluador_id", True)))
+    evaluador_id = _entero_positivo("evaluador_id", True)
+    exigir_mismo_usuario(evaluador_id)
+    return jsonify(_repositorio().listar_evaluaciones(evaluador_id))

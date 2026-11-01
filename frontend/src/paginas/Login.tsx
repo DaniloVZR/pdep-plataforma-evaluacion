@@ -44,6 +44,7 @@ export function Login() {
         rol: respuesta.rol,
         usuarioId: respuesta.usuario_id,
         nombre: respuesta.nombre,
+        token: respuesta.token,
       })
       navegar(RUTA_INICIAL[respuesta.rol])
     } catch (causa) {

@@ -262,6 +262,20 @@ class CredencialesInvalidasError(ErrorDominio):
     estado_http = 401
 
 
+class SesionRequeridaError(ErrorDominio):
+    """La petición no trae un token de sesión válido o ya venció (RNF-03, PDEP-47)."""
+
+    codigo = "sesion_requerida"
+    estado_http = 401
+
+
+class SinPermisoError(ErrorDominio):
+    """El rol de la sesión no puede hacer esta acción, o intenta actuar por otra persona."""
+
+    codigo = "sin_permiso"
+    estado_http = 403
+
+
 class ErrorPersistencia(ErrorDominio):
     """Falla inesperada de la base de datos. La operación se deshizo."""
 

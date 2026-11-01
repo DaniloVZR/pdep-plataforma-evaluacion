@@ -69,35 +69,55 @@ texto plano porque es un prototipo académico; no use contraseñas reales.
 | Evaluador (docente 1) | `evaluador@pascualbravo.edu.co` | `evaluador123` |
 | Estudiante (usuario 2, Equipo Demo) | `estudiante@pascualbravo.edu.co` | `estudiante123` |
 
-`POST /api/login` con `{"correo", "clave"}` responde 200 con `{"usuario_id", "nombre", "rol"}`,
+`POST /api/login` con `{"correo", "clave"}` responde 200 con `{"usuario_id", "nombre", "rol", "token"}`,
 400 si falta un dato y 401 si el correo o la clave no coinciden. Las cuentas están en la tabla
 `cuenta`, separada de `usuario`, así que el registro de HU-003 no cambia.
 
-Ejemplos con los datos de demostración:
+### Control de roles en la API (PDEP-47)
+
+Todos los endpoints, menos `/api/login`, piden el token en el encabezado
+`Authorization: Bearer <token>` (el frontend lo envía solo). El token está firmado con
+`SECRET_KEY` y vence a las 8 horas; en un servidor real se define la variable de entorno
+`PDEP_SECRET_KEY`.
+
+| Endpoint | Rol que puede usarlo |
+|---|---|
+| `POST /api/usuarios`, `/instituciones`, `/facultades`, `/departamentos`, `/programas`, `/asignaturas`, `/ferias`, `/proyectos/<id>/evaluadores` | Administrador |
+| `POST /api/proyectos` | Estudiante |
+| `PUT /api/proyectos/<id>/evaluacion` | Evaluador, solo con su propio `evaluador_id` |
+| `GET /api/resultados?estudiante_id=` | Estudiante, solo con su propio id |
+| `GET /api/evaluaciones?evaluador_id=` | Evaluador, solo con su propio id |
+| Los demás `GET` (listas) | Cualquier sesión |
+
+El administrador puede usar todos, porque con "Ver como" revisa la plataforma desde los
+otros roles. Sin token o con un token inválido la respuesta es 401 (`sesion_requerida`);
+con otro rol, 403 (`sin_permiso`).
+
+Ejemplos con los datos de demostración (primero se inicia sesión y se guarda el token):
 
 ```bash
-curl -X POST http://127.0.0.1:5000/api/login -H "Content-Type: application/json" \
-  -d '{"correo": "admin@pascualbravo.edu.co", "clave": "admin123"}'
+TOKEN=$(curl -s -X POST http://127.0.0.1:5000/api/login -H "Content-Type: application/json" \
+  -d '{"correo": "admin@pascualbravo.edu.co", "clave": "admin123"}' | python -c "import sys, json; print(json.load(sys.stdin)['token'])")
 
-curl -X POST http://127.0.0.1:5000/api/usuarios -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:5000/api/usuarios -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"nombres": "Ana", "correo": "ana@pascualbravo.edu.co", "rol": "ESTUDIANTE", "programa_id": 1, "asignatura_ids": [1]}'
 
-curl -X POST http://127.0.0.1:5000/api/proyectos -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:5000/api/proyectos -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"equipo_id": 1, "feria_id": 1, "nombre": "Robot clasificador", "modalidad": "PIA", "asignatura_ids": [1, 2]}'
 
-curl -X PUT http://127.0.0.1:5000/api/proyectos/1/evaluacion -H "Content-Type: application/json" \
+curl -X PUT http://127.0.0.1:5000/api/proyectos/1/evaluacion -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"evaluador_id": 1, "notas": {"1": 4.0, "2": 3.0, "3": 5.0}, "confirmar": true}'
 
-curl -X POST http://127.0.0.1:5000/api/facultades -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:5000/api/facultades -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"institucion_id": 1, "nombre": "Facultad de Producción y Diseño"}'
 
-curl -X POST http://127.0.0.1:5000/api/programas -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:5000/api/programas -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"institucion_id": 1, "codigo": "ISW", "nombre": "Ingeniería de Software", "facultad_id": 1}'
 
-curl -X POST http://127.0.0.1:5000/api/ferias -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:5000/api/ferias -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"institucion_id": 1, "nombre": "Feria 2027-1", "fecha_inicio": "2027-03-01", "fecha_fin": "2027-03-15", "asignatura_ids": [1, 2], "criterios": [{"nombre": "Funcionalidad", "peso": 0.6}, {"nombre": "Presentación", "peso": 0.4}]}'
 
-curl -X POST http://127.0.0.1:5000/api/proyectos/1/evaluadores -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:5000/api/proyectos/1/evaluadores -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
   -d '{"evaluador_ids": [1]}'   # 409: el docente 1 ya evalúa el proyecto 1 (REQ-12)
 ```
 

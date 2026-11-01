@@ -3,9 +3,10 @@
 from flask import Blueprint, jsonify, request
 
 from app.db import obtener_conexion
-from app.dominio.modelos import ResultadoProyecto
+from app.dominio.modelos import ResultadoProyecto, RolCuenta
 from app.repositorios.sqlite_repositorios import SqliteResultadoRepositorio
 from app.servicios.resultado_servicio import ConsultaResultadosServicio
+from app.seguridad import exigir_mismo_usuario, requiere_rol
 
 resultados_bp = Blueprint("resultados", __name__, url_prefix="/api")
 
@@ -35,6 +36,7 @@ def _como_json(proyecto: ResultadoProyecto) -> dict:
 
 
 @resultados_bp.get("/resultados")
+@requiere_rol(RolCuenta.ESTUDIANTE)
 def consultar_resultados():
     """REQ-17 · Proyectos del estudiante; puntaje y retroalimentación solo si está confirmada.
 
@@ -42,5 +44,6 @@ def consultar_resultados():
     rechaza con 400.
     """
     estudiante_id = request.args.get("estudiante_id", type=int)
+    exigir_mismo_usuario(estudiante_id)
     proyectos = construir_servicio().consultar(estudiante_id)
     return jsonify([_como_json(proyecto) for proyecto in proyectos])

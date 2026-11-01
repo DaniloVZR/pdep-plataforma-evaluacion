@@ -10,6 +10,8 @@ from app.repositorios.sqlite_repositorios import (
     SqliteUsuarioRepositorio,
 )
 from app.servicios.registro_usuario_servicio import RegistroUsuarioServicio
+from app.dominio.modelos import RolCuenta
+from app.seguridad import requiere_rol
 
 usuarios_bp = Blueprint("usuarios", __name__, url_prefix="/api/usuarios")
 
@@ -26,6 +28,7 @@ def construir_servicio() -> RegistroUsuarioServicio:
 
 
 @usuarios_bp.post("")
+@requiere_rol(RolCuenta.ADMINISTRADOR)
 def registrar_usuario():
     """Recibe el JSON, delega en el servicio y responde 201 con el usuario creado.
 

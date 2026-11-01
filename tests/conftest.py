@@ -52,7 +52,36 @@ def fixture_app(ruta_bd):
     return create_app({"TESTING": True, "DATABASE": ruta_bd})
 
 
+CUENTAS_DE_PRUEBA = {
+    "ADMINISTRADOR": ("admin@pascualbravo.edu.co", "admin123"),
+    "EVALUADOR": ("evaluador@pascualbravo.edu.co", "evaluador123"),
+    "ESTUDIANTE": ("estudiante@pascualbravo.edu.co", "estudiante123"),
+}
+
+
+def _cliente_con_sesion(app, rol: str):
+    """Inicia sesión con la cuenta de prueba del rol y deja el token en cada petición."""
+    cliente = app.test_client()
+    correo, clave = CUENTAS_DE_PRUEBA[rol]
+    token = cliente.post("/api/login", json={"correo": correo, "clave": clave}).get_json()["token"]
+    cliente.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+    return cliente
+
+
 @pytest.fixture(name="cliente")
 def fixture_cliente(app):
-    """Cliente HTTP de pruebas de Flask (no abre ningún puerto)."""
-    return app.test_client()
+    """Cliente HTTP de pruebas con sesión de administrador (no abre ningún puerto).
+
+    Desde PDEP-47 la API pide un token. El administrador puede usar todos los
+    endpoints, así que las pruebas de cada historia siguen probando sus reglas sin
+    cambiar. El control por rol se prueba aparte en ``test_roles.py``.
+    """
+    return _cliente_con_sesion(app, "ADMINISTRADOR")
+
+
+@pytest.fixture(name="cliente_como")
+def fixture_cliente_como(app):
+    """Fábrica de clientes: ``cliente_como("ESTUDIANTE")``; ``None`` = sin sesión."""
+    def crear(rol: str | None):
+        return app.test_client() if rol is None else _cliente_con_sesion(app, rol)
+    return crear

@@ -10,6 +10,8 @@ from app.repositorios.sqlite_repositorios import (
 )
 from app.servicios.inscripcion_servicio import InscripcionServicio
 from app.servicios.reloj import RelojSistema
+from app.dominio.modelos import RolCuenta
+from app.seguridad import requiere_rol
 
 proyectos_bp = Blueprint("proyectos", __name__, url_prefix="/api/proyectos")
 
@@ -26,6 +28,7 @@ def construir_servicio() -> InscripcionServicio:
 
 
 @proyectos_bp.post("")
+@requiere_rol(RolCuenta.ESTUDIANTE)
 def inscribir_proyecto():
     """Recibe el JSON, delega en el servicio y responde 201 con el proyecto inscrito."""
     proyecto = construir_servicio().inscribir(request.get_json(silent=True))
