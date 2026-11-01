@@ -13,6 +13,8 @@ function leerSesionGuardada(): Sesion | null {
       dato !== null &&
       typeof dato.rol === 'string' &&
       ROLES.includes(dato.rol) &&
+      typeof dato.rolCuenta === 'string' &&
+      ROLES.includes(dato.rolCuenta) &&
       typeof dato.nombre === 'string' &&
       typeof dato.cuenta === 'string' &&
       (dato.usuarioId === null || typeof dato.usuarioId === 'number')

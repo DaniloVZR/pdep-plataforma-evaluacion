@@ -2,6 +2,7 @@
 -- Las restricciones UNIQUE son la segunda barrera contra duplicados: cubren el
 -- caso en que dos solicitudes iguales pasan la validación al mismo tiempo.
 
+DROP TABLE IF EXISTS cuenta;
 DROP TABLE IF EXISTS calificacion_criterio;
 DROP TABLE IF EXISTS evaluacion;
 DROP TABLE IF EXISTS criterio;
@@ -81,6 +82,18 @@ CREATE TABLE usuario (
     rol             TEXT NOT NULL CHECK (rol IN ('ESTUDIANTE', 'DOCENTE')),
     programa_id     INTEGER NOT NULL REFERENCES programa (id),
     fecha_registro  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- RNF-03: cuenta de acceso con su rol (actores del RTF1). Está separada de `usuario`
+-- para no cambiar el registro de HU-003. Solo el administrador no tiene usuario asociado.
+-- La clave va en texto plano porque es un prototipo académico, no un sistema en producción.
+CREATE TABLE cuenta (
+    id          INTEGER PRIMARY KEY,
+    correo      TEXT NOT NULL UNIQUE,
+    clave       TEXT NOT NULL,
+    rol         TEXT NOT NULL CHECK (rol IN ('ADMINISTRADOR', 'EVALUADOR', 'ESTUDIANTE')),
+    usuario_id  INTEGER UNIQUE REFERENCES usuario (id),
+    CHECK ((rol = 'ADMINISTRADOR') = (usuario_id IS NULL))
 );
 
 CREATE TABLE usuario_asignatura (

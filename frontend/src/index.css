@@ -579,12 +579,6 @@ input[aria-invalid='true'] {
   font-size: 0.925rem;
   margin: 1.25rem 0 0;
 }
-.login-nota {
-  color: #dbe6f3;
-  font-size: 0.85rem;
-  text-align: center;
-  margin: 1.25rem 0 0.5rem;
-}
 .login-volver {
   display: flex;
   align-items: center;

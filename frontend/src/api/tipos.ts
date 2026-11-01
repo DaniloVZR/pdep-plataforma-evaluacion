@@ -4,6 +4,8 @@
 export type Rol = 'ESTUDIANTE' | 'DOCENTE'
 export type Modalidad = 'PA' | 'PIA'
 export type EstadoEvaluacion = 'PENDIENTE' | 'BORRADOR' | 'CONFIRMADA'
+/** Rol de la cuenta con la que se inicia sesión (RNF-03; actores del RTF1). */
+export type RolCuenta = 'ADMINISTRADOR' | 'EVALUADOR' | 'ESTUDIANTE'
 
 /** Cuerpo de error de cualquier respuesta 4xx/5xx. */
 export interface ErrorRespuesta {
@@ -12,6 +14,19 @@ export interface ErrorRespuesta {
 }
 
 // ───────────── Escrituras ─────────────
+
+// RNF-03 · POST /api/login
+export interface SolicitudLogin {
+  correo: string
+  clave: string
+}
+
+/** Respuesta del inicio de sesión. El administrador no tiene usuario (usuario_id null). */
+export interface RespuestaLogin {
+  usuario_id: number | null
+  nombre: string
+  rol: RolCuenta
+}
 
 // HU-003 · POST /api/usuarios
 export interface SolicitudUsuario {

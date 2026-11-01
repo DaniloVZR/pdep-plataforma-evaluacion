@@ -22,6 +22,13 @@ INSERT INTO usuario (id, nombres, correo, rol, programa_id) VALUES
     (1, 'Docente Evaluador', 'evaluador@pascualbravo.edu.co', 'DOCENTE', 1),
     (2, 'Estudiante Demo', 'estudiante@pascualbravo.edu.co', 'ESTUDIANTE', 1);
 
+-- Cuentas de acceso (RNF-03): una por rol. El evaluador es el docente 1 y el
+-- estudiante es el integrante del Equipo Demo.
+INSERT INTO cuenta (correo, clave, rol, usuario_id) VALUES
+    ('admin@pascualbravo.edu.co', 'admin123', 'ADMINISTRADOR', NULL),
+    ('evaluador@pascualbravo.edu.co', 'evaluador123', 'EVALUADOR', 1),
+    ('estudiante@pascualbravo.edu.co', 'estudiante123', 'ESTUDIANTE', 2);
+
 INSERT INTO equipo (id, nombre) VALUES (1, 'Equipo Demo');
 INSERT INTO equipo_integrante (equipo_id, usuario_id) VALUES (1, 2);
 

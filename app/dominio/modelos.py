@@ -92,6 +92,29 @@ class Usuario:
     asignatura_ids: tuple[int, ...] = ()
 
 
+class RolCuenta(str, Enum):
+    """Rol con el que se entra a la plataforma (RNF-03). Son los actores del RTF1."""
+
+    ADMINISTRADOR = "ADMINISTRADOR"
+    EVALUADOR = "EVALUADOR"
+    ESTUDIANTE = "ESTUDIANTE"
+
+
+@dataclass(frozen=True)
+class Cuenta:
+    """Cuenta de acceso (RNF-03).
+
+    Está separada de ``Usuario`` para no cambiar el registro de HU-003. El
+    administrador no es un usuario académico, así que su ``usuario_id`` es ``None``.
+    """
+
+    correo: str
+    clave: str
+    rol: RolCuenta
+    usuario_id: int | None
+    nombre: str
+
+
 @dataclass(frozen=True)
 class Feria:
     """Feria de proyectos con su plazo de inscripción."""
