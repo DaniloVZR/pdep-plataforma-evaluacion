@@ -154,6 +154,12 @@ class NotaFueraDeRangoError(ReglaNegocioError):
     codigo = "nota_fuera_de_rango"
 
 
+class FechasFeriaInvalidasError(ReglaNegocioError):
+    """La fecha de fin de la feria no es posterior a la de inicio (HU-004)."""
+
+    codigo = "fechas_feria_invalidas"
+
+
 class EstructuraInconsistenteError(ReglaNegocioError):
     """La facultad o el departamento del programa son de otra institución (HU-001)."""
 

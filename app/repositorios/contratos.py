@@ -159,3 +159,18 @@ class CuentaRepositorio(Protocol):
 
     def buscar_por_correo(self, correo: str) -> Cuenta | None:
         """Cuenta del correo (ya normalizado) con el nombre de su usuario, o ``None``."""
+
+
+class CreacionFeriaRepositorio(Protocol):
+    """Creación de ferias con sus asignaturas y su rúbrica (HU-004)."""
+
+    def existe_institucion(self, institucion_id: int) -> bool:
+        """``True`` si la institución existe."""
+
+    def asignaturas_de_institucion(self, institucion_id: int,
+                                   asignatura_ids: tuple[int, ...]) -> frozenset[int]:
+        """Subconjunto de ``asignatura_ids`` que existe y pertenece a la institución."""
+
+    def guardar_feria(self, institucion_id: int, feria: Feria,
+                      criterios: tuple[tuple[str, float], ...]) -> Feria:
+        """Inserta la feria, sus asignaturas, su rúbrica y sus criterios en una transacción."""

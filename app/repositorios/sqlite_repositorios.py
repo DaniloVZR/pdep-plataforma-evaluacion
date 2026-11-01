@@ -14,6 +14,8 @@ import sqlite3
 
 from app.dominio.errores import ConflictoUnicidadError, ErrorPersistencia
 from app.dominio.modelos import (
+    NOTA_MAXIMA,
+    NOTA_MINIMA,
     Asignacion,
     Criterio,
     Cuenta,
@@ -400,3 +402,47 @@ class SqliteCuentaRepositorio:
             return None
         return Cuenta(fila["correo"], fila["clave"], RolCuenta(fila["rol"]),
                       fila["usuario_id"], fila["nombre"])
+
+
+class SqliteCreacionFeriaRepositorio:
+    """Creación de ferias con sus asignaturas y su rúbrica (HU-004)."""
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def existe_institucion(self, institucion_id: int) -> bool:
+        """``True`` si la institución existe."""
+        fila = self._conexion.execute(
+            "SELECT 1 FROM institucion WHERE id = ?", (institucion_id,)).fetchone()
+        return fila is not None
+
+    def asignaturas_de_institucion(self, institucion_id: int,
+                                   asignatura_ids: tuple[int, ...]) -> frozenset[int]:
+        """Asignaturas que existen y cuyo programa es de la institución. Una sola consulta."""
+        filas = self._conexion.execute(
+            "SELECT a.id FROM asignatura a JOIN programa p ON p.id = a.programa_id "
+            f"WHERE p.institucion_id = ? AND a.id IN ({_marcadores(len(asignatura_ids))})",
+            (institucion_id, *asignatura_ids),
+        ).fetchall()
+        return frozenset(fila["id"] for fila in filas)
+
+    def guardar_feria(self, institucion_id: int, feria: Feria,
+                      criterios: tuple[tuple[str, float], ...]) -> Feria:
+        """Feria, asignaturas, rúbrica (escala 1.0 a 5.0) y criterios: todo o nada."""
+        with transaccion(self._conexion) as conexion:
+            feria_id = conexion.execute(
+                "INSERT INTO feria (institucion_id, nombre, fecha_inicio, fecha_fin) "
+                "VALUES (?, ?, ?, ?)",
+                (institucion_id, feria.nombre, feria.fecha_inicio.isoformat(),
+                 feria.fecha_fin.isoformat()),
+            ).lastrowid
+            conexion.executemany(
+                "INSERT INTO feria_asignatura (feria_id, asignatura_id) VALUES (?, ?)",
+                [(feria_id, asignatura_id) for asignatura_id in sorted(feria.asignatura_ids)])
+            rubrica_id = conexion.execute(
+                "INSERT INTO rubrica (feria_id, nota_minima, nota_maxima) VALUES (?, ?, ?)",
+                (feria_id, NOTA_MINIMA, NOTA_MAXIMA)).lastrowid
+            conexion.executemany(
+                "INSERT INTO criterio (rubrica_id, nombre, peso) VALUES (?, ?, ?)",
+                [(rubrica_id, nombre, peso) for nombre, peso in criterios])
+        return replace(feria, id=feria_id)
