@@ -20,6 +20,15 @@ interface EvaluacionRepositorio {
   + obtener_asignada(evaluador_id: int, proyecto_id: int): Evaluacion | None
   + guardar_calificacion(evaluacion: Evaluacion): Evaluacion
 }
+class SqliteEvaluacionRepositorio {
+  - conexion: sqlite3.Connection
+  + obtener_asignada(evaluador_id: int, proyecto_id: int): Evaluacion | None
+  + guardar_calificacion(evaluacion: Evaluacion): Evaluacion
+}
+class SqliteRubricaRepositorio {
+  - conexion: sqlite3.Connection
+  + obtener_por_feria(feria_id: int): Rubrica | None
+}
 interface RubricaRepositorio {
   + obtener_por_feria(feria_id: int): Rubrica | None
 }
@@ -89,4 +98,13 @@ EvaluacionRepositorio ..> Evaluacion : devuelve / guarda
 Rubrica "1" *-- "1..*" Criterio
 Evaluacion --> EstadoEvaluacion
 CalificacionServicio ..> Errores : lanza
+SqliteEvaluacionRepositorio ..|> EvaluacionRepositorio
+SqliteRubricaRepositorio ..|> RubricaRepositorio
+SqliteEvaluacionRepositorio ..> ErrorPersistencia : lanza si falla la BD (ROLLBACK)
+class ErrorPersistencia <<ErrorDominio → 500>>
+note bottom of EvaluacionControlador
+  construir_servicio() llama a obtener_conexion(),
+  que abre current_app.config["DATABASE"].
+  En pruebas: create_app({"DATABASE": base temporal})
+end note
 @enduml

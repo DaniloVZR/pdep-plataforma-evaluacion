@@ -13,10 +13,16 @@ HANDLER = ("manejar_error_dominio(e)",
            "jsonify({codigo, mensaje}),", "e.estado_http")
 
 
+# Salida implícita: transaccion() traduce cualquier sqlite3.Error a ErrorPersistencia (500)
+# después del ROLLBACK. No hay if ni except en el servicio, así que no suma a V(G).
+EXCEPCIONES = {"HU-003": [(14, 18)], "HU-005": [(19, 23)], "HU-007": [(29, 31)]}
+ETIQUETA_500 = " ErrorPersistencia → 500 "
+
+
 def hu003():
     n = {
         1: ("act", "UsuarioControlador.registrar_usuario()", ["datos = request.get_json(silent=True)", "servicio.registrar(datos)"]),
-        2: ("dec", "usuario_validador", ["validar_datos_registro(datos)", "¿cuerpo, tipos y", "campos válidos?"]),
+        2: ("dec", "usuario_validador (subproceso, Fig. 8)", ["validar_datos_registro(datos)", "¿retorna sin lanzar", "DatoInvalidoError?"]),
         3: ("err", "", ["raise DatoInvalidoError", "→ HTTP 400"]),
         4: ("act", "RegistroUsuarioServicio.registrar()", ["correo = normalizar_correo(datos['correo'])", "dominios = institucion_repo.listar_dominios()"]),
         5: ("dec", "", ["¿dominio_es_institucional(", "correo, dominios)?"]),
@@ -54,7 +60,7 @@ def hu003():
 def hu005():
     n = {
         1: ("act", "ProyectoControlador.inscribir_proyecto()", ["datos = request.get_json(silent=True)", "servicio.inscribir(datos)"]),
-        2: ("dec", "proyecto_validador", ["validar_datos_inscripcion(", "datos): ¿tipos, campos", "y RN009 válidos?"]),
+        2: ("dec", "proyecto_validador (subproceso, Fig. 9)", ["validar_datos_inscripcion(datos)", "¿retorna sin lanzar", "DatoInvalidoError?"]),
         3: ("err", "", ["raise DatoInvalidoError", "→ HTTP 400"]),
         4: ("dec", "InscripcionServicio.inscribir()", ["¿equipo_repo", ".existe(equipo_id)?"]),
         5: ("err", "", ["raise EquipoNoEncontradoError", "→ HTTP 404"]),
@@ -101,7 +107,7 @@ def hu005():
 def hu007():
     n = {
         1: ("act", "EvaluacionControlador.calificar_proyecto()", ["datos = request.get_json(silent=True)", "servicio.calificar(proyecto_id, datos)"]),
-        2: ("dec", "calificacion_validador", ["validar_solicitud_", "calificacion(datos):", "¿evaluador_id, notas", "y confirmar válidos?"]),
+        2: ("dec", "calificacion_validador (subproceso, Fig. 10)", ["validar_solicitud_", "calificacion(datos):", "¿retorna sin lanzar", "DatoInvalidoError?"]),
         3: ("err", "", ["raise DatoInvalidoError", "→ HTTP 400"]),
         4: ("act", "CalificacionServicio.calificar()", ["evaluacion = evaluacion_repo.obtener_asignada(", "evaluador_id, proyecto_id)"]),
         5: ("dec", "", ["¿evaluacion is None?"]),
@@ -113,7 +119,7 @@ def hu007():
         11: ("err", "", ["raise RubricaNoEncontradaError", "→ HTTP 422"]),
         12: ("dec", "validar_rubrica(rubrica)", ["¿not rubrica.criterios?"]),
         13: ("err", "", ["raise RubricaSinCriteriosError", "→ HTTP 422"]),
-        14: ("dec", "", ["¿rubrica", ".pesos_validos()?", "(peso > 0 y", "|Σ peso − 1| ≤ 1e-6)"]),
+        14: ("dec", "subproceso, Fig. 10", ["¿rubrica", ".pesos_validos()?"]),
         15: ("err", "", ["raise PesosInvalidosError", "→ HTTP 422"]),
         16: ("dec", "validar_notas_completas()", ["¿set(notas) ==", "rubrica.ids_criterios()?"]),
         17: ("err", "", ["raise NotasIncompletasError", "→ HTTP 422"]),
@@ -215,10 +221,11 @@ def etiqueta(num, comp, lineas, tipo):
     return f'<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD VALIGN="TOP"><B>{num}</B>  </TD><TD ALIGN="LEFT">{cuerpo}</TD></TR></TABLE>>'
 
 
-def dot(nombre, n, e, incluir=None, conector_salida=None, conector_entrada=None):
+def dot(nombre, n, e, incluir=None, conector_salida=None, conector_entrada=None,
+        excepciones=(), vueltas=((24, 19),), vueltas_libres=(), salidas_ciclo=(), splines="ortho", conector_regreso=False):
     incluir = set(incluir or n)
     l = ['digraph G {',
-         f'graph [rankdir=TB, splines=ortho, fontname="{FONT}", nodesep=0.5, ranksep=0.3, pad=0.2, dpi=200, newrank=true];',
+         f'graph [rankdir=TB, splines={splines}, fontname="{FONT}", nodesep=0.5, ranksep=0.3, pad=0.2, dpi=200, newrank=true];',
          f'node [fontname="{FONT}", fontsize=10.5, penwidth=1.1, color=black];',
          f'edge [fontname="{FONT}", fontsize=9.5, penwidth=1.0, arrowsize=0.65, color=black];',
          'ini [shape=circle, style=filled, fillcolor=black, label="", width=0.22, fixedsize=true];',
@@ -253,13 +260,31 @@ def dot(nombre, n, e, incluir=None, conector_salida=None, conector_entrada=None)
                 attrs.append('constraint=false')
             if n[a][0] == "dec" and n[b][0] == "err":
                 attrs.append('tailport=e, headport=w')
-            if (a, b) == (24, 19):
-                l.append('n19:w -> n24:w [dir=back];')
+            if (a, b) in vueltas:
+                l.append(f'n{b}:w -> n{a}:w [dir=back];')
+                continue
+            if (a, b) in salidas_ciclo:
+                l.append(f'n{a}:e -> n{b}:e [xlabel=" [{lab}] ", weight=0, minlen=2];')
+                continue
+            if conector_regreso and n[a][0] == "err" and n[b][0] == "fin":
+                l.append(f'r{a} [shape=circle, label=<<B>R</B>>, width=0.32, fixedsize=true];')
+                l.append(f'n{a} -> r{a} [constraint=false];')
+                l.append(f'{{rank=same; n{a}; r{a};}}')
+                continue
+            if (a, b) in vueltas_libres:
+                l.append(f'n{a}:w -> n{b}:w [constraint=false, xlabel=" [{lab}] siguiente "];')
                 continue
             l.append(f'n{a} -> n{b} [{", ".join(attrs)}];')
         elif a in incluir and conector_salida and b not in incluir:
             l.append(f'conA [shape=circle, label=<<B>{conector_salida}</B>>, width=0.38, fixedsize=true];')
             l.append(f'n{a} -> conA [xlabel=" [{lab}] "];' if lab else f'n{a} -> conA;')
+    for a, b in vueltas_libres:
+        siguiente = [d for c, d, _ in e if c == b and (c, d) in salidas_ciclo]
+        if siguiente:
+            l.append(f'n{a} -> n{siguiente[0]} [style=invis, weight=10];')
+    for a, b in excepciones:
+        if a in incluir and b in incluir:
+            l.append(f'n{a} -> n{b} [style=dashed, xlabel="{ETIQUETA_500}", constraint=false, tailport=e];')
     fin_num = max(k for k, v in n.items() if v[0] == "fin")
     if fin_num in incluir:
         l.append(f'n{fin_num} -> finx;')
@@ -277,6 +302,110 @@ def dot(nombre, n, e, incluir=None, conector_salida=None, conector_entrada=None)
     with open(nombre + ".dot", "w") as f:
         f.write("\n".join(l))
     subprocess.run(["dot", "-Tpng", nombre + ".dot", "-o", nombre + ".png"], check=True)
+
+
+# --- Subprocesos: flujo interno de los validadores (Figuras 8 a 10) -------------
+# Cada if, for y except es un rombo propio. El "fin" es el regreso al servicio:
+# si no se lanzó nada, el servicio sigue por la salida [sí] de su nodo 2.
+ERR400 = ("err", "", ["raise DatoInvalidoError", "→ sale por C1 del servicio"])
+REGRESO = ("fin", "", ["Regreso al servicio", "(R: conector desde cada raise)"])
+
+
+def val_registro():
+    n = {
+        1: ("act", "usuario_validador.validar_datos_registro(datos)", ["inicio"]),
+        2: ("dec", "", ["¿isinstance(datos, dict)?"]),
+        3: ("dec", "", ["for campo in", "(nombres, correo, rol):", "¿quedan campos?"]),
+        4: ("dec", "", ["¿es_texto_no_vacio(", "datos.get(campo))?"]),
+        5: ("dec", "", ["¿rol.strip().upper() en", "{ESTUDIANTE, DOCENTE}?"]),
+        6: ("dec", "", ["¿es_entero_positivo(", "programa_id)?"]),
+        7: ("dec", "", ["¿es_lista_de_ids(", "asignatura_ids)?"]),
+        8: ("act", "", ["return None"]),
+        9: ERR400, 10: ERR400, 11: ERR400, 12: ERR400, 13: ERR400,
+        14: REGRESO,
+    }
+    e = [(1, 2, ""), (2, 9, "no"), (2, 3, "sí"), (3, 4, "sí"), (3, 5, "no"), (4, 10, "no"),
+         (4, 3, "sí"), (5, 11, "no"), (5, 6, "sí"), (6, 12, "no"), (6, 7, "sí"), (7, 13, "no"),
+         (7, 8, "sí"), (8, 14, ""), (9, 14, ""), (10, 14, ""), (11, 14, ""), (12, 14, ""), (13, 14, "")]
+    return n, e
+
+
+def val_inscripcion():
+    n = {
+        1: ("act", "proyecto_validador.validar_datos_inscripcion(datos)", ["inicio"]),
+        2: ("dec", "", ["¿isinstance(datos, dict)?"]),
+        3: ("dec", "", ["for campo in", "(equipo_id, feria_id):", "¿quedan campos?"]),
+        4: ("dec", "", ["¿es_entero_positivo(", "datos.get(campo))?"]),
+        5: ("dec", "", ["¿es_texto_no_vacio(nombre)?"]),
+        6: ("dec", "", ["¿modalidad en {PA, PIA}?"]),
+        7: ("dec", "", ["¿es_lista_de_ids(asignaturas)", "y la lista no está vacía?"]),
+        8: ("act", "", ["cantidad = len(set(asignaturas))"]),
+        9: ("dec", "RN009", ["¿modalidad == PA", "y cantidad != 1?"]),
+        10: ("dec", "RN009", ["¿modalidad == PIA", "y cantidad < 2?"]),
+        11: ("act", "", ["return None"]),
+        12: ERR400, 13: ERR400, 14: ERR400, 15: ERR400, 16: ERR400, 17: ERR400, 18: ERR400,
+        19: REGRESO,
+    }
+    e = [(1, 2, ""), (2, 12, "no"), (2, 3, "sí"), (3, 4, "sí"), (3, 5, "no"), (4, 13, "no"),
+         (4, 3, "sí"), (5, 14, "no"), (5, 6, "sí"), (6, 15, "no"), (6, 7, "sí"), (7, 16, "no"),
+         (7, 8, "sí"), (8, 9, ""), (9, 17, "sí"), (9, 10, "no"), (10, 18, "sí"), (10, 11, "no"),
+         (11, 19, ""), (12, 19, ""), (13, 19, ""), (14, 19, ""), (15, 19, ""), (16, 19, ""),
+         (17, 19, ""), (18, 19, "")]
+    return n, e
+
+
+def val_calificacion():
+    n = {
+        1: ("act", "calificacion_validador.validar_solicitud_calificacion(datos)", ["inicio"]),
+        2: ("dec", "", ["¿isinstance(datos, dict)?"]),
+        3: ("act", "", ["evaluador_id, notas, confirmar =", "datos.get(...)  # confirmar = False por defecto"]),
+        4: ("dec", "", ["¿es_entero_positivo(", "evaluador_id)?"]),
+        5: ("dec", "", ["¿notas es dict", "y no está vacío?"]),
+        6: ("dec", "", ["¿isinstance(confirmar, bool)?"]),
+        7: ("act", "", ["try: notas_por_criterio =", "{int(clave): valor ...}"]),
+        8: ("dec", "", ["¿except ValueError?"]),
+        9: ("act", "", ["return (evaluador_id,", "notas_por_criterio, confirmar)"]),
+        10: ERR400, 11: ERR400, 12: ERR400, 13: ERR400, 14: ERR400,
+        15: REGRESO,
+    }
+    e = [(1, 2, ""), (2, 10, "no"), (2, 3, "sí"), (3, 4, ""), (4, 11, "no"), (4, 5, "sí"),
+         (5, 12, "no"), (5, 6, "sí"), (6, 13, "no"), (6, 7, "sí"), (7, 8, ""), (8, 14, "sí"),
+         (8, 9, "no"), (9, 15, ""), (10, 15, ""), (11, 15, ""), (12, 15, ""), (13, 15, ""),
+         (14, 15, "")]
+    return n, e
+
+
+def val_pesos():
+    n = {
+        1: ("act", "Rubrica.pesos_validos()", ["inicio"]),
+        2: ("dec", "", ["¿any(criterio.peso <= 0)?"]),
+        3: ("act", "", ["return False"]),
+        4: ("act", "", ["suma = Σ criterio.peso"]),
+        5: ("dec", "", ["¿|suma − 1.0| ≤ 1e-6?"]),
+        6: ("act", "", ["return True"]),
+        7: ("act", "", ["return False"]),
+        8: ("fin", "", ["Regreso a validar_rubrica", "(nodo 14 de la Figura 6)"]),
+    }
+    e = [(1, 2, ""), (2, 3, "sí"), (2, 4, "no"), (4, 5, ""), (5, 6, "sí"), (5, 7, "no"),
+         (3, 8, ""), (6, 8, ""), (7, 8, "")]
+    return n, e
+
+
+VALIDADORES = (
+    ("Val_registro", val_registro, ((4, 3),)),
+    ("Val_inscripcion", val_inscripcion, ((4, 3),)),
+    ("Val_calificacion", val_calificacion, ()),
+    ("Val_pesos", val_pesos, ()),
+)
+
+
+def verificar_validador(nombre, n, e):
+    """V(G) = E − N + 2 debe ser igual a decisiones + 1, y toda arista une nodos existentes."""
+    assert all(a in n and b in n for a, b, _ in e), nombre
+    decisiones = sum(1 for t in n.values() if t[0] == "dec")
+    vg = len(e) - len(n) + 2
+    assert vg == decisiones + 1, (nombre, vg, decisiones)
+    return {"N": len(n), "E": len(e), "decisiones": decisiones, "VG": vg}
 
 
 def exportar():
@@ -313,9 +442,17 @@ if __name__ == "__main__":
         n, e, c = f()
         res[nombre] = verificar(nombre, n, e, c)
     print(json.dumps(res, indent=1))
-    n, e, _ = hu003(); dot("Act_HU003", n, e)
-    n, e, _ = hu005(); dot("Act_HU005", n, e)
+    n, e, _ = hu003(); dot("Act_HU003", n, e, excepciones=EXCEPCIONES["HU-003"])
+    n, e, _ = hu005(); dot("Act_HU005", n, e, excepciones=EXCEPCIONES["HU-005"])
     n, e, _ = hu007()
     dot("Act_HU007_a", n, e, incluir=list(range(1, 18)) + [31, 32], conector_salida="A")
     GRUPO_CICLO.update({25, 26, 29, 30, 32})
-    dot("Act_HU007_b", n, e, incluir=list(range(18, 33)), conector_entrada="A")
+    dot("Act_HU007_b", n, e, incluir=list(range(18, 33)), conector_entrada="A",
+        excepciones=EXCEPCIONES["HU-007"])
+    for nombre, f, vueltas in VALIDADORES:
+        n, e = f()
+        print(nombre, verificar_validador(nombre, n, e))
+        GRUPO_CICLO.clear()
+        dot(nombre, n, e, vueltas=(), vueltas_libres=vueltas,
+            salidas_ciclo=tuple((b, d) for a, b in vueltas for c, d, lab in e if c == b and lab == "no"),
+            splines="polyline" if vueltas else "ortho", conector_regreso=True)
