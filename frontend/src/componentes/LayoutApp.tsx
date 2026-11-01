@@ -9,6 +9,7 @@ const MENU: Record<RolSesion, { a: string; texto: string; seccion?: boolean }[]>
   ADMINISTRADOR: [
     { a: '/admin', texto: 'Panel' },
     { a: '/estructura', texto: 'Estructura académica', seccion: true },
+    { a: '/ferias', texto: 'Ferias' },
     { a: '/usuarios/nuevo', texto: 'Registrar usuario' },
     { a: '/asignaciones', texto: 'Asignar evaluadores' },
     { a: '/proyectos', texto: 'Proyectos' },

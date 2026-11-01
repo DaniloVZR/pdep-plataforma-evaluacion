@@ -342,3 +342,19 @@ textarea {
   background: var(--azul-tenue);
   color: var(--azul);
 }
+
+/* ───────── Ferias (HU-004): fila de criterio con nombre, peso y botón para quitarlo ───────── */
+.criterio-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 2.25rem;
+  gap: 0 1rem;
+  align-items: end;
+}
+.criterio-fila .boton-icono {
+  margin-bottom: 1.1rem;
+  color: var(--texto-suave);
+}
+.criterio-fila .boton-icono:hover {
+  background: var(--rojo-fondo);
+  color: var(--rojo-texto);
+}

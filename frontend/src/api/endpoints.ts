@@ -7,6 +7,7 @@ import type {
   Evaluacion,
   EvaluacionAsignada,
   Feria,
+  FeriaCreada,
   Institucion,
   InstitucionCreada,
   Programa,
@@ -18,6 +19,7 @@ import type {
   Rubrica,
   SolicitudAsignacion,
   SolicitudCalificacion,
+  SolicitudFeria,
   SolicitudInstitucion,
   SolicitudLogin,
   SolicitudPrograma,
@@ -30,6 +32,9 @@ import type {
 } from './tipos'
 
 // ───────────── Escrituras ─────────────
+
+/** HU-004 · Crear una feria con sus asignaturas y su rúbrica (REQ-7). */
+export const crearFeria = (datos: SolicitudFeria) => api.post<FeriaCreada>('/api/ferias', datos)
 
 /** RNF-03 · Iniciar sesión con correo y clave; responde el usuario, su nombre y su rol. */
 export const iniciarSesion = (datos: SolicitudLogin) =>
