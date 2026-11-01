@@ -15,8 +15,8 @@ const ROL_DE_USUARIOS: Record<RolSesion, Rol | null> = {
 }
 
 /**
- * Botón temporal para previsualizar lo que ve cada rol. Desaparece cuando el
- * backend detecte el rol al iniciar sesión.
+ * Herramienta de demostración del administrador: muestra la plataforma como la
+ * vería otro rol sin cerrar sesión. El layout solo la muestra a cuentas de administrador.
  */
 export function CambiarVista() {
   const { sesion, iniciar } = useSesion()
@@ -87,7 +87,7 @@ export function CambiarVista() {
         <form id={idPanel} className="vista-panel" onSubmit={aplicar}>
           <p className="vista-titulo">Previsualizar otra vista</p>
           <p className="vista-ayuda">
-            Solo para pruebas: cuando el servidor tenga inicio de sesión, el rol se detectará solo.
+            Muestra la plataforma como la vería otra persona, sin cerrar tu sesión de administrador.
           </p>
 
           <fieldset>

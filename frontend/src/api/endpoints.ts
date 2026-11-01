@@ -13,11 +13,13 @@ import type {
   ProgramaCreado,
   Proyecto,
   ProyectoListado,
+  RespuestaLogin,
   Rol,
   Rubrica,
   SolicitudAsignacion,
   SolicitudCalificacion,
   SolicitudInstitucion,
+  SolicitudLogin,
   SolicitudPrograma,
   SolicitudProyecto,
   SolicitudUnidad,
@@ -28,6 +30,10 @@ import type {
 } from './tipos'
 
 // ───────────── Escrituras ─────────────
+
+/** RNF-03 · Iniciar sesión con correo y clave; responde el usuario, su nombre y su rol. */
+export const iniciarSesion = (datos: SolicitudLogin) =>
+  api.post<RespuestaLogin>('/api/login', datos)
 
 /** HU-001 · Registrar una institución. */
 export const registrarInstitucion = (datos: SolicitudInstitucion) =>

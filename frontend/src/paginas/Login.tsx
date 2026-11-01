@@ -1,10 +1,14 @@
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useId, useState, type SyntheticEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import type { ErrorApi } from '../api/cliente.ts'
+import { iniciarSesion } from '../api/endpoints.ts'
+import { MensajeError } from '../componentes/Estados.tsx'
 import { Marca } from '../componentes/Marca.tsx'
 import { RUTA_INICIAL, useSesion } from '../sesion/contexto.ts'
+import { comoErrorApi } from '../utilidades.ts'
 
-/** Por ahora todo ingreso entra como administrador: el servidor aún no autentica. */
+/** Inicio de sesión con roles (RNF-03): el servidor valida la cuenta y devuelve su rol. */
 export function Login() {
   const { iniciar } = useSesion()
   const navegar = useNavigate()
@@ -15,6 +19,8 @@ export function Login() {
   const [verClave, setVerClave] = useState(false)
   const [intentado, setIntentado] = useState(false)
   const [recuperar, setRecuperar] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [errorServidor, setErrorServidor] = useState<ErrorApi | null>(null)
 
   const errorCorreo = !correo.trim()
     ? 'Escribe tu correo institucional.'
@@ -23,13 +29,28 @@ export function Login() {
       : ''
   const errorClave = clave ? '' : 'Escribe tu contraseña.'
 
-  function ingresar(evento: SyntheticEvent<HTMLFormElement>) {
+  async function ingresar(evento: SyntheticEvent<HTMLFormElement>) {
     evento.preventDefault()
     setIntentado(true)
+    setErrorServidor(null)
     if (errorCorreo || errorClave) return
-    const cuenta = correo.trim().split('@')[0]
-    iniciar({ cuenta, rol: 'ADMINISTRADOR', usuarioId: null, nombre: 'Administración' })
-    navegar(RUTA_INICIAL.ADMINISTRADOR)
+
+    setEnviando(true)
+    try {
+      const respuesta = await iniciarSesion({ correo: correo.trim(), clave })
+      iniciar({
+        cuenta: respuesta.nombre,
+        rolCuenta: respuesta.rol,
+        rol: respuesta.rol,
+        usuarioId: respuesta.usuario_id,
+        nombre: respuesta.nombre,
+      })
+      navegar(RUTA_INICIAL[respuesta.rol])
+    } catch (causa) {
+      setErrorServidor(comoErrorApi(causa))
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -96,14 +117,19 @@ export function Login() {
             </button>
             {recuperar && (
               <p className="campo-ayuda" role="status">
-                La recuperación de contraseña estará disponible cuando el servidor tenga inicio de
-                sesión.
+                Comunícate con el administrador de la plataforma para restablecer tu contraseña.
               </p>
             )}
           </div>
 
-          <button type="submit" className="boton boton-azul boton-ancho boton-grande">
-            Ingresar
+          {errorServidor && <MensajeError error={errorServidor} />}
+
+          <button
+            type="submit"
+            className="boton boton-azul boton-ancho boton-grande"
+            disabled={enviando}
+          >
+            {enviando ? 'Ingresando…' : 'Ingresar'}
           </button>
 
           <p className="login-pie">
@@ -111,9 +137,6 @@ export function Login() {
           </p>
         </form>
 
-        <p className="login-nota">
-          Modo de demostración: cualquier correo y contraseña ingresan como administrador.
-        </p>
         <Link to="/" className="login-volver">
           <ArrowLeft size={16} aria-hidden="true" /> Volver al inicio
         </Link>

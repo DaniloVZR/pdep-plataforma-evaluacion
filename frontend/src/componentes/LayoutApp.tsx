@@ -48,7 +48,7 @@ export function LayoutApp() {
             ))}
           </nav>
           <div className="encabezado-acciones">
-            <CambiarVista />
+            {sesion.rolCuenta === 'ADMINISTRADOR' && <CambiarVista />}
             <div className="perfil">
               <span className="perfil-texto">Bienvenido, {sesion.cuenta}</span>
               <span className="avatar" aria-hidden="true">
@@ -60,7 +60,7 @@ export function LayoutApp() {
             </div>
           </div>
         </div>
-        {sesion.rol !== 'ADMINISTRADOR' && (
+        {sesion.rolCuenta === 'ADMINISTRADOR' && sesion.rol !== 'ADMINISTRADOR' && (
           <p className="franja-vista" role="status">
             Estás viendo la plataforma como {ETIQUETA_ROL[sesion.rol].toLowerCase()}: {sesion.nombre}
           </p>
