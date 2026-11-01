@@ -15,6 +15,24 @@ export interface ErrorRespuesta {
 
 // ───────────── Escrituras ─────────────
 
+// HU-004 · POST /api/ferias (REQ-7): feria con asignaturas y criterios de evaluación
+export interface SolicitudFeria {
+  institucion_id: number
+  nombre: string
+  fecha_inicio: string // AAAA-MM-DD
+  fecha_fin: string // AAAA-MM-DD
+  asignatura_ids: number[]
+  criterios: { nombre: string; peso: number }[] // pesos entre 0 y 1 que suman 1
+}
+
+export interface FeriaCreada {
+  id: number
+  nombre: string
+  fecha_inicio: string
+  fecha_fin: string
+  asignatura_ids: number[]
+}
+
 // RNF-03 · POST /api/login
 export interface SolicitudLogin {
   correo: string
@@ -193,6 +211,7 @@ export interface Equipo {
 /** GET /api/ferias */
 export interface Feria {
   id: number
+  institucion_id: number
   nombre: string
   fecha_inicio: string // AAAA-MM-DD
   fecha_fin: string // AAAA-MM-DD

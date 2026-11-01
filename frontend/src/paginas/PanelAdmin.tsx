@@ -77,9 +77,9 @@ export function PanelAdmin() {
     { titulo: 'Estudiantes', subtitulo: 'Participantes de proyectos', etiqueta: conteo(estudiantes, 'Registrado', 'Registrados'), color: '#1D4ED8', icono: Users, ruta: '/usuarios/nuevo' },
     { titulo: 'Docentes', subtitulo: 'Plantilla docente', etiqueta: conteo(docentes, 'Registrado', 'Registrados'), color: '#BE185D', icono: UserRound, ruta: '/usuarios/nuevo' },
     { titulo: 'Evaluadores', subtitulo: 'Jurados asignados', etiqueta: conteo(conEvaluaciones, 'Con proyectos', 'Con proyectos'), color: '#047857', icono: UserCheck, ruta: '/asignaciones' },
-    { titulo: 'Ferias / Eventos', subtitulo: 'Organización de periodos', etiqueta: conteo(activas, 'Activa', 'Activas'), color: '#A21CAF', icono: CalendarDays },
+    { titulo: 'Ferias / Eventos', subtitulo: 'Organización de periodos', etiqueta: conteo(activas, 'Activa', 'Activas'), color: '#A21CAF', icono: CalendarDays, ruta: '/ferias' },
     { titulo: 'Proyectos', subtitulo: 'Trabajos inscritos', etiqueta: conteo(proyectos.datos?.length ?? null, 'Inscrito', 'Inscritos'), color: '#0E7490', icono: FolderKanban, ruta: '/proyectos' },
-    { titulo: 'Rúbricas', subtitulo: 'Criterios de evaluación', etiqueta: 'Configurables', color: '#4D7C0F', icono: ListChecks },
+    { titulo: 'Rúbricas', subtitulo: 'Criterios de evaluación', etiqueta: 'Configurables', color: '#4D7C0F', icono: ListChecks, ruta: '/ferias' },
     { titulo: 'Evaluaciones', subtitulo: 'Calificaciones y notas', etiqueta: 'Seguimiento', color: '#4338CA', icono: ClipboardCheck },
     { titulo: 'Reportes', subtitulo: 'Resultados consolidados', etiqueta: 'Generar PDF/Excel', color: '#374151', icono: FileText },
   ]

@@ -15,6 +15,11 @@ from app.dominio.errores import NotaFueraDeRangoError, TipoNotaInvalidoError
 # punto flotante y debe considerarse igual a 1.
 TOLERANCIA_PESOS = 1e-6
 
+# Escala de notas de las rúbricas que se crean con una feria (HU-004); es la misma que usa
+# HU-007 con los datos de demostración.
+NOTA_MINIMA = 1.0
+NOTA_MAXIMA = 5.0
+
 
 class Rol(str, Enum):
     """Roles que se pueden registrar en HU-003."""

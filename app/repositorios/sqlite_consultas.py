@@ -88,10 +88,11 @@ class SqliteConsultaRepositorio:
                         "JOIN asignatura a ON a.id = fa.asignatura_id ORDER BY a.nombre"),
             "feria_id", ("id", "codigo", "nombre"))
         return [
-            {"id": f["id"], "nombre": f["nombre"], "fecha_inicio": f["fecha_inicio"],
-             "fecha_fin": f["fecha_fin"], "asignaturas": asignaturas[f["id"]]}
-            for f in self._filas("SELECT id, nombre, fecha_inicio, fecha_fin FROM feria "
-                                 "ORDER BY fecha_inicio DESC")
+            {"id": f["id"], "institucion_id": f["institucion_id"], "nombre": f["nombre"],
+             "fecha_inicio": f["fecha_inicio"], "fecha_fin": f["fecha_fin"],
+             "asignaturas": asignaturas[f["id"]]}
+            for f in self._filas("SELECT id, institucion_id, nombre, fecha_inicio, fecha_fin "
+                                 "FROM feria ORDER BY fecha_inicio DESC")
         ]
 
     def existe_feria(self, feria_id: int) -> bool:

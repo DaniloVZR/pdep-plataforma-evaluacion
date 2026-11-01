@@ -4,6 +4,7 @@ import { LayoutPublico } from './componentes/LayoutPublico.tsx'
 import { RequiereRol } from './componentes/RequiereRol.tsx'
 import { Landing } from './paginas/Landing.tsx'
 import { Login } from './paginas/Login.tsx'
+import { Ferias } from './paginas/Ferias.tsx'
 import { PanelAdmin } from './paginas/PanelAdmin.tsx'
 import { Programas } from './paginas/Programas.tsx'
 import { AsignarEvaluadores } from './paginas/AsignarEvaluadores.tsx'
@@ -75,6 +76,14 @@ export default function App() {
           element={
             <RequiereRol roles={['ADMINISTRADOR']}>
               <AsignarEvaluadores />
+            </RequiereRol>
+          }
+        />
+        <Route
+          path="ferias"
+          element={
+            <RequiereRol roles={['ADMINISTRADOR']}>
+              <Ferias />
             </RequiereRol>
           }
         />

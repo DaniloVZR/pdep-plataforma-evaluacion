@@ -87,6 +87,9 @@ curl -X POST http://127.0.0.1:5000/api/facultades -H "Content-Type: application/
 curl -X POST http://127.0.0.1:5000/api/programas -H "Content-Type: application/json" \
   -d '{"institucion_id": 1, "codigo": "ISW", "nombre": "Ingeniería de Software", "facultad_id": 1}'
 
+curl -X POST http://127.0.0.1:5000/api/ferias -H "Content-Type: application/json" \
+  -d '{"institucion_id": 1, "nombre": "Feria 2027-1", "fecha_inicio": "2027-03-01", "fecha_fin": "2027-03-15", "asignatura_ids": [1, 2], "criterios": [{"nombre": "Funcionalidad", "peso": 0.6}, {"nombre": "Presentación", "peso": 0.4}]}'
+
 curl -X POST http://127.0.0.1:5000/api/proyectos/1/evaluadores -H "Content-Type: application/json" \
   -d '{"evaluador_ids": [1]}'   # 409: el docente 1 ya evalúa el proyecto 1 (REQ-12)
 ```
@@ -104,7 +107,7 @@ pruebas del RTF3 no cambia. Los errores siguen el formato `{"codigo", "mensaje"}
 | `GET /api/programas` | Programas con su facultad o departamento y sus asignaturas | Registro de usuarios (HU-003) y estructura (HU-001) |
 | `GET /api/usuarios?rol=DOCENTE` | Usuarios; `rol` es opcional | Elegir el evaluador (HU-007) |
 | `GET /api/equipos` | Equipos con sus integrantes | Formulario de inscripción (HU-005) |
-| `GET /api/ferias` | Ferias con fechas y asignaturas participantes | Formulario de inscripción (HU-005) |
+| `GET /api/ferias` | Ferias con su institución, fechas y asignaturas participantes | Inscripción (HU-005) y ferias (HU-004) |
 | `GET /api/ferias/<id>/rubrica` | Escala y criterios con su peso (404 si no existe la feria, 422 si no tiene rúbrica) | Pantalla de calificación (HU-007) |
 | `GET /api/proyectos?feria_id=1` | Proyectos inscritos con sus evaluadores; `feria_id` es opcional | Listado de proyectos y asignación (HU-006) |
 | `GET /api/evaluadores/carga` | Cada docente con sus proyectos asignados, pendientes, borradores y confirmados | Carga por evaluador (HU-006) |
