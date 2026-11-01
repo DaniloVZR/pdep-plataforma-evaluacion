@@ -1,7 +1,6 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import { Contexto, type Sesion } from './contexto.ts'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { CLAVE_SESION as CLAVE, Contexto, EVENTO_SESION_VENCIDA, type Sesion } from './contexto.ts'
 
-const CLAVE = 'pdep.sesion'
 const ROLES = ['ADMINISTRADOR', 'EVALUADOR', 'ESTUDIANTE']
 
 function leerSesionGuardada(): Sesion | null {
@@ -17,6 +16,7 @@ function leerSesionGuardada(): Sesion | null {
       ROLES.includes(dato.rolCuenta) &&
       typeof dato.nombre === 'string' &&
       typeof dato.cuenta === 'string' &&
+      typeof dato.token === 'string' &&
       (dato.usuarioId === null || typeof dato.usuarioId === 'number')
     return valida ? (dato as Sesion) : null
   } catch {
@@ -44,6 +44,13 @@ export function SesionProveedor({ children }: { children: ReactNode }) {
       // Nada que borrar.
     }
   }, [])
+
+  // Si el servidor responde 401 (token vencido o alterado), se cierra la sesión y
+  // RequiereRol lleva a la pantalla de ingreso.
+  useEffect(() => {
+    window.addEventListener(EVENTO_SESION_VENCIDA, cerrar)
+    return () => window.removeEventListener(EVENTO_SESION_VENCIDA, cerrar)
+  }, [cerrar])
 
   const valor = useMemo(() => ({ sesion, iniciar, cerrar }), [sesion, iniciar, cerrar])
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

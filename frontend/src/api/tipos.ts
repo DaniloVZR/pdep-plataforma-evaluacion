@@ -44,6 +44,8 @@ export interface RespuestaLogin {
   usuario_id: number | null
   nombre: string
   rol: RolCuenta
+  /** Token firmado que se envía en cada petición (PDEP-47). */
+  token: string
 }
 
 // HU-003 · POST /api/usuarios

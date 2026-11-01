@@ -13,6 +13,8 @@ from app.repositorios.sqlite_repositorios import (
     SqliteRegistroAsignaturaRepositorio,
 )
 from app.servicios.asignatura_servicio import RegistroAsignaturaServicio
+from app.dominio.modelos import RolCuenta
+from app.seguridad import requiere_rol
 
 asignaturas_bp = Blueprint("asignaturas", __name__, url_prefix="/api")
 
@@ -27,6 +29,7 @@ def construir_servicio() -> RegistroAsignaturaServicio:
 
 
 @asignaturas_bp.post("/asignaturas")
+@requiere_rol(RolCuenta.ADMINISTRADOR)
 def registrar_asignatura():
     """REQ-4 · 201 con la asignatura creada y el programa al que quedó asociada."""
     asignatura = construir_servicio().registrar(request.get_json(silent=True))

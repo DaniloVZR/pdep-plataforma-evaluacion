@@ -1,5 +1,6 @@
 """Fábrica de la aplicación Flask de PDEP."""
 
+import os
 from pathlib import Path
 
 from flask import Flask, jsonify
@@ -21,7 +22,11 @@ from app.dominio.errores import ErrorDominio
 def create_app(config: dict | None = None) -> Flask:
     """Crea la aplicación. ``config`` permite a las pruebas usar otra base de datos."""
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(DATABASE=str(Path(app.instance_path) / "pdep.sqlite3"))
+    app.config.from_mapping(
+        DATABASE=str(Path(app.instance_path) / "pdep.sqlite3"),
+        # Firma los tokens de sesión (PDEP-47). En un servidor real se pone PDEP_SECRET_KEY.
+        SECRET_KEY=os.environ.get("PDEP_SECRET_KEY", "pdep-clave-de-desarrollo"),
+    )
     if config:
         app.config.update(config)
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)

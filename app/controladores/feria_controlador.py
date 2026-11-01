@@ -8,6 +8,8 @@ from flask import Blueprint, jsonify, request
 from app.db import obtener_conexion
 from app.repositorios.sqlite_repositorios import SqliteCreacionFeriaRepositorio
 from app.servicios.feria_servicio import FeriaServicio
+from app.dominio.modelos import RolCuenta
+from app.seguridad import requiere_rol
 
 ferias_bp = Blueprint("ferias", __name__, url_prefix="/api")
 
@@ -18,6 +20,7 @@ def construir_servicio() -> FeriaServicio:
 
 
 @ferias_bp.post("/ferias")
+@requiere_rol(RolCuenta.ADMINISTRADOR)
 def crear_feria():
     """REQ-7 · 201 con la feria creada; su rúbrica se consulta en /api/ferias/<id>/rubrica."""
     feria = construir_servicio().crear(request.get_json(silent=True))
