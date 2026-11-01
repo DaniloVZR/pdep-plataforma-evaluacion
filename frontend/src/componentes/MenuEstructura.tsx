@@ -1,4 +1,4 @@
-import { Building2, GraduationCap, Landmark } from 'lucide-react'
+import { BookOpen, Building2, GraduationCap, Landmark } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import type { Institucion } from '../api/tipos.ts'
 
@@ -6,9 +6,10 @@ const SECCIONES = [
   { a: '/estructura/instituciones', texto: 'Instituciones', icono: Landmark },
   { a: '/estructura/facultades', texto: 'Facultades y departamentos', icono: Building2 },
   { a: '/estructura/programas', texto: 'Programas', icono: GraduationCap },
+  { a: '/estructura/asignaturas', texto: 'Asignaturas', icono: BookOpen },
 ]
 
-/** Menú rápido entre las tres pantallas de HU-001. Conserva la institución elegida. */
+/** Menú rápido entre las pantallas de HU-001 y HU-002. Conserva la institución elegida. */
 export function MenuEstructura() {
   const { search } = useLocation()
   return (

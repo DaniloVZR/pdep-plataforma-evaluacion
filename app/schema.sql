@@ -169,6 +169,8 @@ CREATE TABLE evaluacion (
                         CHECK (estado IN ('PENDIENTE', 'BORRADOR', 'CONFIRMADA')),
     puntaje_final       REAL,
     fecha_confirmacion  TEXT,
+    -- HU-009 · REQ-17: comentario del evaluador; el estudiante lo ve solo si está CONFIRMADA.
+    retroalimentacion   TEXT NOT NULL DEFAULT '',
     UNIQUE (proyecto_id, evaluador_id)
 );
 

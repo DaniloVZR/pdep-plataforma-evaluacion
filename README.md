@@ -19,6 +19,13 @@ Sprint 6 agrega:
 | HU-001 Registrar institución, facultades, departamentos y programas | PDEP-5 | `POST /api/instituciones`, `POST /api/facultades`, `POST /api/departamentos`, `POST /api/programas` | `EstructuraAcademicaServicio` |
 | HU-006 Asignar evaluadores a los proyectos | PDEP-10 | `POST /api/proyectos/<id>/evaluadores` | `AsignacionServicio.asignar` |
 
+También se agregan (cada historia completa: backend, pruebas y pantalla):
+
+| Historia | Jira | Endpoints | Servicio | Pantalla |
+|---|---|---|---|---|
+| HU-002 Registrar asignaturas y asociarlas a un programa | PDEP-6 | `POST /api/asignaturas`, `GET /api/asignaturas?programa_id=` | `RegistroAsignaturaServicio.registrar` | `/estructura/asignaturas` (administrador) |
+| HU-009 Consultar calificación y retroalimentación | PDEP-13 | `GET /api/resultados?estudiante_id=` | `ConsultaResultadosServicio.consultar` | `/resultados` (estudiante) |
+
 Autores: Angelo Alexander Arango Graciano y Joimar Danilo Urrego David.
 
 ## Arquitectura
@@ -104,6 +111,7 @@ pruebas del RTF3 no cambia. Los errores siguen el formato `{"codigo", "mensaje"}
 | `GET /api/instituciones` | Instituciones con contacto y dominios | Estructura académica (HU-001) |
 | `GET /api/facultades?institucion_id=1` | Facultades; el filtro es opcional | Estructura académica (HU-001) |
 | `GET /api/departamentos?institucion_id=1` | Departamentos; el filtro es opcional | Estructura académica (HU-001) |
+| `GET /api/asignaturas?programa_id=1` | Asignaturas con su programa, ordenadas por semestre; el filtro es opcional (404 si el programa no existe) | Pantalla de asignaturas (HU-002) |
 | `GET /api/programas` | Programas con su facultad o departamento y sus asignaturas | Registro de usuarios (HU-003) y estructura (HU-001) |
 | `GET /api/usuarios?rol=DOCENTE` | Usuarios; `rol` es opcional | Elegir el evaluador (HU-007) |
 | `GET /api/equipos` | Equipos con sus integrantes | Formulario de inscripción (HU-005) |
@@ -131,7 +139,7 @@ Con eso basta tener las dos terminales abiertas: `flask --app app run` y `npm ru
 ## Pruebas y análisis estático
 
 ```bash
-coverage run -m pytest      # 212 pruebas
+coverage run -m pytest      # 310 pruebas
 coverage report             # cobertura de líneas y de ramas (branch = true)
 coverage html               # reporte navegable en htmlcov/index.html
 pylint app tests            # análisis estático
@@ -166,5 +174,13 @@ GitHub Actions ejecuta las pruebas, la cobertura y Pylint en cada `push` a `main
 - **Asignación de evaluadores (HU-006):** solo docentes; un evaluador no se asigna
   dos veces al mismo proyecto (REQ-12). La solicitud es todo o nada: si un evaluador
   falla, no se asigna ninguno. Cada asignación crea la evaluación PENDIENTE que usa HU-007.
+- **Asignaturas (HU-002):** código, nombre, semestre (entero mayor que 0) y programa
+  obligatorios; 404 si el programa no existe y 409 si el código ya está registrado (se
+  guarda en mayúsculas). Usa la tabla `asignatura` que ya existía.
+- **Retroalimentación y resultados (HU-009):** HU-007 acepta un campo opcional
+  `retroalimentacion` (texto) que se guarda con la evaluación. `GET /api/resultados`
+  devuelve los proyectos de los equipos del estudiante con cada evaluación; el puntaje y
+  la retroalimentación solo salen si la evaluación está CONFIRMADA (RN007). Se muestran el
+  evaluador y la fecha de confirmación (RNF-06). Solo un estudiante puede consultarlo (422).
 - **Duplicados simultáneos (RNF-02):** además de la consulta previa, la base de
   datos tiene restricciones UNIQUE y cada escritura va en una transacción.

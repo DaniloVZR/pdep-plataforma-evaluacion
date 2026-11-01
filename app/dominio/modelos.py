@@ -1,4 +1,4 @@
-"""Entidades del dominio que usan HU-001, HU-003, HU-005, HU-006 y HU-007.
+"""Entidades del dominio que usan HU-001 a HU-007 y HU-009.
 
 Son ``dataclasses`` inmutables: no conocen la base de datos ni Flask, por lo
 que su lógica se prueba con objetos creados en memoria.
@@ -83,6 +83,17 @@ class Programa:
     nombre: str
     facultad_id: int | None = None
     departamento_id: int | None = None
+
+
+@dataclass(frozen=True)
+class Asignatura:
+    """Asignatura asociada a un programa académico (HU-002, REQ-4)."""
+
+    id: int | None
+    programa_id: int
+    codigo: str
+    nombre: str
+    semestre: int
 
 
 @dataclass(frozen=True)
@@ -226,6 +237,7 @@ class Evaluacion:
     puntaje_final: float | None = None
     fecha_confirmacion: datetime | None = None
     notas: dict[int, float] = field(default_factory=dict)
+    retroalimentacion: str = ""
 
     @property
     def puntaje_visible(self) -> float | None:
@@ -235,11 +247,46 @@ class Evaluacion:
         return None
 
     def con_calificacion(self, notas: dict[int, float], puntaje: float,
-                         confirmada: bool, momento: datetime) -> "Evaluacion":
-        """Devuelve una copia con las notas, el puntaje y el nuevo estado."""
+                         confirmada: bool, momento: datetime,
+                         retroalimentacion: str = "") -> "Evaluacion":
+        """Devuelve una copia con las notas, el puntaje, la retroalimentación y el nuevo
+        estado."""
         if confirmada:
             return replace(self, notas=notas, puntaje_final=puntaje,
                            estado=EstadoEvaluacion.CONFIRMADA,
-                           fecha_confirmacion=momento)
+                           fecha_confirmacion=momento, retroalimentacion=retroalimentacion)
         return replace(self, notas=notas, puntaje_final=puntaje,
-                       estado=EstadoEvaluacion.BORRADOR, fecha_confirmacion=None)
+                       estado=EstadoEvaluacion.BORRADOR, fecha_confirmacion=None,
+                       retroalimentacion=retroalimentacion)
+
+
+@dataclass(frozen=True)
+class ResultadoEvaluacion:
+    """Lo que un evaluador dejó sobre un proyecto, tal como lo consulta el estudiante (HU-009).
+
+    ``puntaje_final`` y ``retroalimentacion`` valen ``None`` cuando están ocultos.
+    """
+
+    evaluacion_id: int
+    evaluador: str
+    estado: EstadoEvaluacion
+    puntaje_final: float | None
+    retroalimentacion: str | None
+    fecha_confirmacion: datetime | None
+
+    def publicada(self) -> "ResultadoEvaluacion":
+        """RN007: mientras no esté confirmada se ocultan el puntaje y la retroalimentación."""
+        if self.estado is EstadoEvaluacion.CONFIRMADA:
+            return self
+        return replace(self, puntaje_final=None, retroalimentacion=None)
+
+
+@dataclass(frozen=True)
+class ResultadoProyecto:
+    """Proyecto del estudiante con las evaluaciones de sus evaluadores (HU-009)."""
+
+    proyecto_id: int
+    proyecto: str
+    feria: str
+    equipo: str
+    evaluaciones: tuple[ResultadoEvaluacion, ...] = ()

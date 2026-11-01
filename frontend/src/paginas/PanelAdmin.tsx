@@ -73,7 +73,7 @@ export function PanelAdmin() {
     { titulo: 'Instituciones', subtitulo: 'Gestión principal', etiqueta: conteo(instituciones.datos?.length ?? null, 'Registrada', 'Registradas'), color: '#0A3D73', icono: Landmark, ruta: '/estructura/instituciones' },
     { titulo: 'Facultades y Departamentos', subtitulo: 'Estructura interna', etiqueta: 'Configuración', color: '#6D28D9', icono: Network, ruta: '/estructura/facultades' },
     { titulo: 'Programas', subtitulo: 'Programas académicos', etiqueta: conteo(programas.datos?.length ?? null, 'Activo', 'Activos'), color: '#0F766E', icono: GraduationCap, ruta: '/estructura/programas' },
-    { titulo: 'Asignaturas', subtitulo: 'Materias vinculadas', etiqueta: conteo(asignaturas, 'Activa', 'Activas'), color: '#C2410C', icono: BookOpen },
+    { titulo: 'Asignaturas', subtitulo: 'Materias vinculadas', etiqueta: conteo(asignaturas, 'Activa', 'Activas'), color: '#C2410C', icono: BookOpen, ruta: '/estructura/asignaturas' },
     { titulo: 'Estudiantes', subtitulo: 'Participantes de proyectos', etiqueta: conteo(estudiantes, 'Registrado', 'Registrados'), color: '#1D4ED8', icono: Users, ruta: '/usuarios/nuevo' },
     { titulo: 'Docentes', subtitulo: 'Plantilla docente', etiqueta: conteo(docentes, 'Registrado', 'Registrados'), color: '#BE185D', icono: UserRound, ruta: '/usuarios/nuevo' },
     { titulo: 'Evaluadores', subtitulo: 'Jurados asignados', etiqueta: conteo(conEvaluaciones, 'Con proyectos', 'Con proyectos'), color: '#047857', icono: UserCheck, ruta: '/asignaciones' },

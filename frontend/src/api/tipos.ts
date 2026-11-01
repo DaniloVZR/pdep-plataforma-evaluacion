@@ -91,6 +91,8 @@ export interface SolicitudCalificacion {
   notas: Record<string, number>
   /** false o ausente = borrador; true = confirmar y publicar el puntaje. */
   confirmar?: boolean
+  /** HU-009 · Comentario para el equipo; lo ve el estudiante cuando se confirma. */
+  retroalimentacion?: string
 }
 
 export interface Evaluacion {
@@ -100,6 +102,7 @@ export interface Evaluacion {
   /** Solo viene con valor cuando la evaluación está CONFIRMADA. */
   puntaje_final: number | null
   fecha_confirmacion: string | null // ISO 8601 con zona horaria
+  retroalimentacion: string
 }
 
 // HU-001 · POST /api/instituciones
@@ -152,6 +155,22 @@ export interface ProgramaCreado {
   departamento_id: number | null
 }
 
+// HU-002 · POST /api/asignaturas
+export interface SolicitudAsignatura {
+  programa_id: number
+  codigo: string
+  nombre: string
+  semestre: number
+}
+
+export interface AsignaturaCreada {
+  id: number
+  programa_id: number
+  codigo: string
+  nombre: string
+  semestre: number
+}
+
 // HU-006 · POST /api/proyectos/<id>/evaluadores
 export interface SolicitudAsignacion {
   evaluador_ids: number[]
@@ -190,6 +209,12 @@ export interface Programa {
   facultad_id: number | null
   departamento_id: number | null
   asignaturas: AsignaturaDePrograma[]
+}
+
+/** GET /api/asignaturas[?programa_id=] (HU-002) */
+export interface AsignaturaListada extends AsignaturaCreada {
+  /** Nombre del programa al que está asociada. */
+  programa: string
 }
 
 /** GET /api/usuarios[?rol=] */
@@ -271,4 +296,29 @@ export interface EvaluacionAsignada {
   /** Solo viene con valor cuando la evaluación está CONFIRMADA. */
   puntaje_final: number | null
   fecha_confirmacion: string | null
+  /** Comentario del propio evaluador (también en borrador). */
+  retroalimentacion: string
+  /** Notas guardadas por criterio (clave: id del criterio); vacío si aún no calificó. */
+  notas: Record<string, number>
+}
+
+/** Evaluación de un proyecto tal como la ve el estudiante (HU-009, RN007). */
+export interface ResultadoEvaluacion {
+  evaluacion_id: number
+  evaluador: string
+  estado: EstadoEvaluacion
+  /** null mientras la evaluación no esté CONFIRMADA. */
+  puntaje_final: number | null
+  /** null mientras la evaluación no esté CONFIRMADA; "" si el evaluador no escribió nada. */
+  retroalimentacion: string | null
+  fecha_confirmacion: string | null
+}
+
+/** GET /api/resultados?estudiante_id= (HU-009) */
+export interface ResultadoProyecto {
+  proyecto_id: number
+  proyecto: string
+  feria: string
+  equipo: string
+  evaluaciones: ResultadoEvaluacion[]
 }

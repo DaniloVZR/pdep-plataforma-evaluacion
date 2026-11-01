@@ -10,6 +10,7 @@ from typing import Protocol
 
 from app.dominio.modelos import (
     Asignacion,
+    Asignatura,
     Cuenta,
     Departamento,
     Evaluacion,
@@ -18,6 +19,7 @@ from app.dominio.modelos import (
     Institucion,
     Programa,
     Proyecto,
+    ResultadoProyecto,
     Rubrica,
     Usuario,
 )
@@ -42,6 +44,16 @@ class AsignaturaRepositorio(Protocol):
 
     def ids_existentes(self, asignatura_ids: tuple[int, ...]) -> frozenset[int]:
         """Subconjunto de ``asignatura_ids`` que existe en la base de datos."""
+
+
+class RegistroAsignaturaRepositorio(Protocol):
+    """Registro de asignaturas (HU-002)."""
+
+    def guardar(self, asignatura: Asignatura) -> Asignatura:
+        """Inserta la asignatura.
+
+        Lanza ``ConflictoUnicidadError`` si la base de datos rechaza el código por duplicado.
+        """
 
 
 class UsuarioRepositorio(Protocol):
@@ -174,3 +186,14 @@ class CreacionFeriaRepositorio(Protocol):
     def guardar_feria(self, institucion_id: int, feria: Feria,
                       criterios: tuple[tuple[str, float], ...]) -> Feria:
         """Inserta la feria, sus asignaturas, su rúbrica y sus criterios en una transacción."""
+
+
+class ResultadoRepositorio(Protocol):
+    """Resultados de los proyectos de un estudiante (HU-009)."""
+
+    def rol_de_usuario(self, usuario_id: int) -> str | None:
+        """Rol del usuario (``ESTUDIANTE`` o ``DOCENTE``), o ``None`` si no existe."""
+
+    def resultados_de_estudiante(self, usuario_id: int) -> tuple[ResultadoProyecto, ...]:
+        """Proyectos de los equipos del estudiante con todas sus evaluaciones, sin ocultar
+        nada: el servicio decide qué se publica (RN007)."""

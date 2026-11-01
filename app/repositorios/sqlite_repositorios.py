@@ -17,6 +17,7 @@ from app.dominio.modelos import (
     NOTA_MAXIMA,
     NOTA_MINIMA,
     Asignacion,
+    Asignatura,
     Criterio,
     Cuenta,
     Departamento,
@@ -27,6 +28,8 @@ from app.dominio.modelos import (
     Institucion,
     Programa,
     Proyecto,
+    ResultadoEvaluacion,
+    ResultadoProyecto,
     RolCuenta,
     Rubrica,
     Usuario,
@@ -100,6 +103,23 @@ class SqliteAsignaturaRepositorio:
             asignatura_ids,
         ).fetchall()
         return frozenset(fila["id"] for fila in filas)
+
+
+class SqliteRegistroAsignaturaRepositorio:
+    """Registro de asignaturas (HU-002)."""
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def guardar(self, asignatura: Asignatura) -> Asignatura:
+        """Inserta la asignatura; el código repetido lo rechaza la restricción UNIQUE."""
+        with transaccion(self._conexion) as conexion:
+            cursor = conexion.execute(
+                "INSERT INTO asignatura (programa_id, codigo, nombre, semestre) "
+                "VALUES (?, ?, ?, ?)",
+                (asignatura.programa_id, asignatura.codigo, asignatura.nombre,
+                 asignatura.semestre))
+        return replace(asignatura, id=cursor.lastrowid)
 
 
 class SqliteUsuarioRepositorio:
@@ -236,7 +256,7 @@ class SqliteEvaluacionRepositorio:
         """La evaluación del evaluador para el proyecto, o ``None`` si no está asignado."""
         fila = self._conexion.execute(
             "SELECT e.id, e.proyecto_id, e.evaluador_id, p.feria_id, e.estado, "
-            "e.puntaje_final, e.fecha_confirmacion FROM evaluacion e "
+            "e.puntaje_final, e.fecha_confirmacion, e.retroalimentacion FROM evaluacion e "
             "JOIN proyecto p ON p.id = e.proyecto_id "
             "WHERE e.evaluador_id = ? AND e.proyecto_id = ?",
             (evaluador_id, proyecto_id)).fetchone()
@@ -251,6 +271,7 @@ class SqliteEvaluacionRepositorio:
             estado=EstadoEvaluacion(fila["estado"]),
             puntaje_final=fila["puntaje_final"],
             fecha_confirmacion=datetime.fromisoformat(fecha) if fecha else None,
+            retroalimentacion=fila["retroalimentacion"],
         )
 
     def guardar_calificacion(self, evaluacion: Evaluacion) -> Evaluacion:
@@ -258,10 +279,11 @@ class SqliteEvaluacionRepositorio:
         fecha = evaluacion.fecha_confirmacion
         with transaccion(self._conexion) as conexion:
             conexion.execute(
-                "UPDATE evaluacion SET estado = ?, puntaje_final = ?, fecha_confirmacion = ? "
-                "WHERE id = ?",
+                "UPDATE evaluacion SET estado = ?, puntaje_final = ?, fecha_confirmacion = ?, "
+                "retroalimentacion = ? WHERE id = ?",
                 (evaluacion.estado.value, evaluacion.puntaje_final,
-                 fecha.isoformat() if fecha else None, evaluacion.id),
+                 fecha.isoformat() if fecha else None, evaluacion.retroalimentacion,
+                 evaluacion.id),
             )
             conexion.execute(
                 "DELETE FROM calificacion_criterio WHERE evaluacion_id = ?", (evaluacion.id,))
@@ -446,3 +468,46 @@ class SqliteCreacionFeriaRepositorio:
                 "INSERT INTO criterio (rubrica_id, nombre, peso) VALUES (?, ?, ?)",
                 [(rubrica_id, nombre, peso) for nombre, peso in criterios])
         return replace(feria, id=feria_id)
+
+
+class SqliteResultadoRepositorio:
+    """Resultados de los proyectos de un estudiante (HU-009). Solo lectura."""
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def rol_de_usuario(self, usuario_id: int) -> str | None:
+        """Rol del usuario, o ``None`` si no existe."""
+        fila = self._conexion.execute(
+            "SELECT rol FROM usuario WHERE id = ?", (usuario_id,)).fetchone()
+        return None if fila is None else fila["rol"]
+
+    def resultados_de_estudiante(self, usuario_id: int) -> tuple[ResultadoProyecto, ...]:
+        """Dos consultas: los proyectos de sus equipos y las evaluaciones de esos proyectos."""
+        proyectos = self._conexion.execute(
+            "SELECT p.id, p.nombre, f.nombre AS feria, e.nombre AS equipo FROM proyecto p "
+            "JOIN equipo e ON e.id = p.equipo_id JOIN feria f ON f.id = p.feria_id "
+            "JOIN equipo_integrante ei ON ei.equipo_id = p.equipo_id "
+            "WHERE ei.usuario_id = ? ORDER BY p.id", (usuario_id,)).fetchall()
+        evaluaciones = self._conexion.execute(
+            "SELECT ev.id, ev.proyecto_id, u.nombres AS evaluador, ev.estado, "
+            "ev.puntaje_final, ev.retroalimentacion, ev.fecha_confirmacion "
+            "FROM evaluacion ev JOIN usuario u ON u.id = ev.evaluador_id "
+            "JOIN proyecto p ON p.id = ev.proyecto_id "
+            "JOIN equipo_integrante ei ON ei.equipo_id = p.equipo_id "
+            "WHERE ei.usuario_id = ? ORDER BY ev.id", (usuario_id,)).fetchall()
+        por_proyecto: dict[int, list[ResultadoEvaluacion]] = {p["id"]: [] for p in proyectos}
+        for fila in evaluaciones:
+            fecha = fila["fecha_confirmacion"]
+            por_proyecto[fila["proyecto_id"]].append(ResultadoEvaluacion(
+                evaluacion_id=fila["id"],
+                evaluador=fila["evaluador"],
+                estado=EstadoEvaluacion(fila["estado"]),
+                puntaje_final=fila["puntaje_final"],
+                retroalimentacion=fila["retroalimentacion"],
+                fecha_confirmacion=datetime.fromisoformat(fecha) if fecha else None,
+            ))
+        return tuple(
+            ResultadoProyecto(p["id"], p["nombre"], p["feria"], p["equipo"],
+                              tuple(por_proyecto[p["id"]]))
+            for p in proyectos)

@@ -20,6 +20,7 @@ const MENU: Record<RolSesion, { a: string; texto: string; seccion?: boolean }[]>
   ],
   ESTUDIANTE: [
     { a: '/proyectos/inscribir', texto: 'Inscribir proyecto' },
+    { a: '/resultados', texto: 'Mis resultados' },
     { a: '/proyectos', texto: 'Proyectos' },
   ],
 }

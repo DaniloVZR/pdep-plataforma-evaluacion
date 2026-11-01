@@ -35,6 +35,17 @@ def validar_solicitud_calificacion(datos: object) -> tuple[int, dict[int, object
     return evaluador_id, notas_por_criterio, confirmar
 
 
+def leer_retroalimentacion(datos: dict) -> str:
+    """HU-009 · ``retroalimentacion`` es opcional; si viene, debe ser texto.
+
+    Se guarda sin espacios al inicio ni al final; ausente equivale a ``""``.
+    """
+    retroalimentacion = datos.get("retroalimentacion", "")
+    if not isinstance(retroalimentacion, str):
+        raise DatoInvalidoError("El campo 'retroalimentacion' debe ser texto.")
+    return retroalimentacion.strip()
+
+
 def validar_rubrica(rubrica: Rubrica) -> None:
     """La rúbrica debe tener criterios y pesos positivos que sumen 1."""
     if not rubrica.criterios:

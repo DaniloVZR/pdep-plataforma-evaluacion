@@ -8,7 +8,12 @@ recursos inexistentes con su error 404, igual que en el resto de la API.
 from flask import Blueprint, jsonify, request
 
 from app.db import obtener_conexion
-from app.dominio.errores import DatoInvalidoError, FeriaNoEncontradaError, RubricaNoEncontradaError
+from app.dominio.errores import (
+    DatoInvalidoError,
+    FeriaNoEncontradaError,
+    ProgramaNoEncontradoError,
+    RubricaNoEncontradaError,
+)
 from app.dominio.modelos import Rol
 from app.repositorios.sqlite_consultas import SqliteConsultaRepositorio
 
@@ -33,6 +38,16 @@ def _entero_positivo(nombre: str, obligatorio: bool) -> int | None:
 def listar_programas():
     """Programas con su facultad o departamento y sus asignaturas."""
     return jsonify(_repositorio().listar_programas())
+
+
+@consultas_bp.get("/asignaturas")
+def listar_asignaturas():
+    """HU-002 · Asignaturas; ``?programa_id=1`` filtra por programa (404 si no existe)."""
+    repositorio = _repositorio()
+    programa_id = _entero_positivo("programa_id", False)
+    if programa_id is not None and not repositorio.existe_programa(programa_id):
+        raise ProgramaNoEncontradoError("El programa académico indicado no existe.")
+    return jsonify(repositorio.listar_asignaturas(programa_id))
 
 
 @consultas_bp.get("/instituciones")

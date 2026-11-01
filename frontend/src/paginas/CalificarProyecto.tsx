@@ -84,7 +84,14 @@ interface PropsFormulario {
 function FormularioRubrica({ rubrica, asignada, evaluadorId }: PropsFormulario) {
   const id = useId()
   const { nota_minima: minima, nota_maxima: maxima } = rubrica
-  const [notas, setNotas] = useState<Record<number, string>>({})
+  // Si había un borrador, el formulario arranca con las notas que ya se habían guardado.
+  const [notas, setNotas] = useState<Record<number, string>>(() =>
+    Object.fromEntries(
+      Object.entries(asignada.notas ?? {}).map(([criterioId, nota]) => [criterioId, String(nota)]),
+    ),
+  )
+  // HU-009: si había un borrador, se recupera el comentario que ya se había escrito.
+  const [retroalimentacion, setRetroalimentacion] = useState(asignada.retroalimentacion ?? '')
   const [intentado, setIntentado] = useState(false)
   const [enviando, setEnviando] = useState<'borrador' | 'confirmar' | null>(null)
   const [errorServidor, setErrorServidor] = useState<ErrorApi | null>(null)
@@ -123,6 +130,7 @@ function FormularioRubrica({ rubrica, asignada, evaluadorId }: PropsFormulario) 
         evaluador_id: evaluadorId,
         notas: Object.fromEntries(rubrica.criterios.map((c) => [String(c.id), Number(notas[c.id])])),
         confirmar,
+        retroalimentacion: retroalimentacion.trim(),
       })
       if (confirmar) setResultado(respuesta)
       else {
@@ -146,6 +154,7 @@ function FormularioRubrica({ rubrica, asignada, evaluadorId }: PropsFormulario) 
     const puntaje = resultado?.puntaje_final ?? asignada.puntaje_final
     const fecha = resultado?.fecha_confirmacion ?? asignada.fecha_confirmacion
     const conDesglose = resultado !== null
+    const comentario = resultado?.retroalimentacion ?? asignada.retroalimentacion ?? ''
     return (
       <div className="tarjeta resultado">
         <CheckCircle2 size={40} className="resultado-icono" aria-hidden="true" />
@@ -155,6 +164,12 @@ function FormularioRubrica({ rubrica, asignada, evaluadorId }: PropsFormulario) 
           <small> / {maxima}</small>
         </p>
         {fecha && <p className="texto-suave">Confirmada el {formatearFechaHora(fecha)}</p>}
+        {comentario && (
+          <blockquote className="retroalimentacion">
+            <p className="tarjeta-subtitulo">Retroalimentación para el equipo</p>
+            <p>{comentario}</p>
+          </blockquote>
+        )}
 
         {conDesglose && (
           <table className="tabla tabla-compacta">
@@ -235,6 +250,22 @@ function FormularioRubrica({ rubrica, asignada, evaluadorId }: PropsFormulario) 
           )
         })}
       </ul>
+
+      <div className="campo">
+        <label htmlFor={`${id}-retroalimentacion`}>
+          Retroalimentación para el equipo <small className="texto-suave">(opcional)</small>
+        </label>
+        <textarea
+          id={`${id}-retroalimentacion`}
+          rows={4}
+          value={retroalimentacion}
+          onChange={(e) => {
+            setRetroalimentacion(e.target.value)
+            setBorradorGuardado(false)
+          }}
+        />
+        <p className="campo-ayuda">El equipo la verá junto con el puntaje cuando confirmes (RN007).</p>
+      </div>
 
       <div className="acciones">
         <button

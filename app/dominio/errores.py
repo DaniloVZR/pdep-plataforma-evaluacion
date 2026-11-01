@@ -93,6 +93,12 @@ class EvaluadorNoEncontradoError(RecursoNoEncontradoError):
     codigo = "evaluador_no_encontrado"
 
 
+class UsuarioNoEncontradoError(RecursoNoEncontradoError):
+    """El usuario indicado no existe (HU-009)."""
+
+    codigo = "usuario_no_encontrado"
+
+
 class ReglaNegocioError(ErrorDominio):
     """Base de los errores por reglas de negocio incumplidas."""
 
@@ -172,6 +178,12 @@ class UsuarioNoDocenteError(ReglaNegocioError):
     codigo = "usuario_no_docente"
 
 
+class UsuarioNoEstudianteError(ReglaNegocioError):
+    """Solo un estudiante consulta los resultados de sus proyectos (HU-009)."""
+
+    codigo = "usuario_no_estudiante"
+
+
 class ConflictoError(ErrorDominio):
     """Base de los errores por registros duplicados o estados que no permiten el cambio."""
 
@@ -225,6 +237,12 @@ class EvaluadorYaAsignadoError(ConflictoError):
     """El evaluador ya está asignado a ese proyecto (HU-006, REQ-12)."""
 
     codigo = "evaluador_ya_asignado"
+
+
+class AsignaturaDuplicadaError(ConflictoError):
+    """Ya existe una asignatura con ese código (HU-002)."""
+
+    codigo = "asignatura_duplicada"
 
 
 class EvaluadorNoAsignadoError(ErrorDominio):
