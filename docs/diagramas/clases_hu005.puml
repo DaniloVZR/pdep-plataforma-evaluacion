@@ -35,6 +35,11 @@ interface ProyectoRepositorio {
   + existe_en_feria(equipo_id: int, nombre_normalizado: str, feria_id: int): bool
   + registrar(proyecto: Proyecto, nombre_normalizado: str): Proyecto
 }
+class SqliteProyectoRepositorio {
+  - conexion: sqlite3.Connection
+  + existe_en_feria(equipo_id: int, nombre_normalizado: str, feria_id: int): bool
+  + registrar(proyecto: Proyecto, nombre_normalizado: str): Proyecto
+}
 class Feria <<dataclass frozen>> {
   + id: int
   + nombre: str
@@ -79,4 +84,14 @@ FeriaRepositorio ..> Feria : devuelve
 InscripcionServicio ..> Proyecto : crea
 Proyecto --> Modalidad
 InscripcionServicio ..> Errores : lanza
+SqliteProyectoRepositorio ..|> ProyectoRepositorio
+SqliteProyectoRepositorio ..> ConflictoUnicidadError : lanza si UNIQUE(feria, equipo, nombre)
+SqliteProyectoRepositorio ..> ErrorPersistencia : lanza si falla la BD (ROLLBACK)
+class ConflictoUnicidadError <<Exception interna>>
+class ErrorPersistencia <<ErrorDominio → 500>>
+note bottom of ProyectoControlador
+  construir_servicio() llama a obtener_conexion(),
+  que abre current_app.config["DATABASE"].
+  En pruebas: create_app({"DATABASE": base temporal})
+end note
 @enduml

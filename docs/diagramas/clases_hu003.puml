@@ -74,5 +74,12 @@ RegistroUsuarioServicio ..> Usuario : crea
 Usuario --> Rol
 RegistroUsuarioServicio ..> Errores : lanza
 SqliteUsuarioRepositorio ..> ConflictoUnicidadError : lanza si UNIQUE(correo)
-class ConflictoUnicidadError <<Exception>>
+class ConflictoUnicidadError <<Exception interna>>
+class ErrorPersistencia <<ErrorDominio → 500>>
+SqliteUsuarioRepositorio ..> ErrorPersistencia : lanza si falla la BD (ROLLBACK)
+note bottom of UsuarioControlador
+  construir_servicio() llama a obtener_conexion(),
+  que abre current_app.config["DATABASE"].
+  En pruebas: create_app({"DATABASE": base temporal})
+end note
 @enduml
