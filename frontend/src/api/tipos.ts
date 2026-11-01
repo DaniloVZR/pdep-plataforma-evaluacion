@@ -69,7 +69,77 @@ export interface Evaluacion {
   fecha_confirmacion: string | null // ISO 8601 con zona horaria
 }
 
+// HU-001 · POST /api/instituciones
+export interface SolicitudInstitucion {
+  nombre: string
+  nit: string
+  correo_contacto?: string
+  telefono?: string
+  /** Dominio del correo institucional (RN001), por ejemplo itm.edu.co. */
+  dominio?: string
+}
+
+export interface InstitucionCreada {
+  id: number
+  nombre: string
+  nit: string
+  correo_contacto: string
+  telefono: string
+  dominio: string
+}
+
+// HU-001 · POST /api/facultades y POST /api/departamentos
+export interface SolicitudUnidad {
+  institucion_id: number
+  nombre: string
+}
+
+/** Facultad o departamento (GET /api/facultades, GET /api/departamentos). */
+export interface Unidad {
+  id: number
+  institucion_id: number
+  nombre: string
+}
+
+// HU-001 · POST /api/programas (facultad, departamento o los dos)
+export interface SolicitudPrograma {
+  institucion_id: number
+  codigo: string
+  nombre: string
+  facultad_id?: number
+  departamento_id?: number
+}
+
+export interface ProgramaCreado {
+  id: number
+  institucion_id: number
+  codigo: string
+  nombre: string
+  facultad_id: number | null
+  departamento_id: number | null
+}
+
+// HU-006 · POST /api/proyectos/<id>/evaluadores
+export interface SolicitudAsignacion {
+  evaluador_ids: number[]
+}
+
+export interface Asignacion {
+  proyecto_id: number
+  asignados: { evaluacion_id: number; evaluador_id: number }[]
+}
+
 // ───────────── Consultas (GET, PDEP-35) ─────────────
+
+/** GET /api/instituciones */
+export interface Institucion {
+  id: number
+  nombre: string
+  nit: string
+  correo_contacto: string
+  telefono: string
+  dominios: string[]
+}
 
 export interface AsignaturaDePrograma {
   id: number
@@ -83,6 +153,9 @@ export interface Programa {
   id: number
   codigo: string
   nombre: string
+  institucion_id: number
+  facultad_id: number | null
+  departamento_id: number | null
   asignaturas: AsignaturaDePrograma[]
 }
 
@@ -138,6 +211,19 @@ export interface ProyectoListado {
   equipo_id: number
   equipo: string
   asignatura_ids: number[]
+  /** Evaluadores asignados al proyecto (HU-006). */
+  evaluadores: { id: number; nombres: string }[]
+}
+
+/** GET /api/evaluadores/carga (HU-006): proyectos asignados a cada docente. */
+export interface CargaEvaluador {
+  id: number
+  nombres: string
+  correo: string
+  asignados: number
+  pendientes: number
+  borradores: number
+  confirmadas: number
 }
 
 /** GET /api/evaluaciones?evaluador_id= */

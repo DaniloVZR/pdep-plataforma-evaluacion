@@ -6,8 +6,13 @@ INSERT INTO institucion (id, nombre, nit) VALUES
 INSERT INTO dominio_institucion (institucion_id, dominio) VALUES
     (1, 'pascualbravo.edu.co');
 
-INSERT INTO programa (id, institucion_id, codigo, nombre) VALUES
-    (1, 1, 'TDS', 'Tecnología en Desarrollo de Software');
+INSERT INTO facultad (id, institucion_id, nombre) VALUES
+    (1, 1, 'Facultad de Ingeniería');
+INSERT INTO departamento (id, institucion_id, nombre) VALUES
+    (1, 1, 'Departamento de Ciencias Básicas');
+
+INSERT INTO programa (id, institucion_id, facultad_id, codigo, nombre) VALUES
+    (1, 1, 1, 'TDS', 'Tecnología en Desarrollo de Software');
 INSERT INTO asignatura (id, programa_id, codigo, nombre, semestre) VALUES
     (1, 1, 'IS2', 'Ingeniería de Software II', 5),
     (2, 1, 'BD2', 'Bases de Datos II', 5),

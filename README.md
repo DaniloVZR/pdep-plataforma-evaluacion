@@ -12,6 +12,13 @@ estructurales (caja blanca), según el diseño del documento RTF3:
 | HU-005 Inscribir un proyecto en una feria | PDEP-9 | `POST /api/proyectos` | `InscripcionServicio.inscribir` |
 | HU-007 Calificar con rúbrica digital | PDEP-11 | `PUT /api/proyectos/<id>/evaluacion` | `CalificacionServicio.calificar` |
 
+Sprint 6 agrega:
+
+| Historia | Jira | Endpoints | Servicio |
+|---|---|---|---|
+| HU-001 Registrar institución, facultades, departamentos y programas | PDEP-5 | `POST /api/instituciones`, `POST /api/facultades`, `POST /api/departamentos`, `POST /api/programas` | `EstructuraAcademicaServicio` |
+| HU-006 Asignar evaluadores a los proyectos | PDEP-10 | `POST /api/proyectos/<id>/evaluadores` | `AsignacionServicio.asignar` |
+
 Autores: Angelo Alexander Arango Graciano y Joimar Danilo Urrego David.
 
 ## Arquitectura
@@ -55,6 +62,15 @@ curl -X POST http://127.0.0.1:5000/api/proyectos -H "Content-Type: application/j
 
 curl -X PUT http://127.0.0.1:5000/api/proyectos/1/evaluacion -H "Content-Type: application/json" \
   -d '{"evaluador_id": 1, "notas": {"1": 4.0, "2": 3.0, "3": 5.0}, "confirmar": true}'
+
+curl -X POST http://127.0.0.1:5000/api/facultades -H "Content-Type: application/json" \
+  -d '{"institucion_id": 1, "nombre": "Facultad de Producción y Diseño"}'
+
+curl -X POST http://127.0.0.1:5000/api/programas -H "Content-Type: application/json" \
+  -d '{"institucion_id": 1, "codigo": "ISW", "nombre": "Ingeniería de Software", "facultad_id": 1}'
+
+curl -X POST http://127.0.0.1:5000/api/proyectos/1/evaluadores -H "Content-Type: application/json" \
+  -d '{"evaluador_ids": [1]}'   # 409: el docente 1 ya evalúa el proyecto 1 (REQ-12)
 ```
 
 ## Endpoints de consulta para el frontend (PDEP-35)
@@ -64,12 +80,16 @@ pruebas del RTF3 no cambia. Los errores siguen el formato `{"codigo", "mensaje"}
 
 | Endpoint | Devuelve | Uso en el frontend |
 |---|---|---|
-| `GET /api/programas` | Programas con sus asignaturas | Formulario de registro (HU-003) |
+| `GET /api/instituciones` | Instituciones con contacto y dominios | Estructura académica (HU-001) |
+| `GET /api/facultades?institucion_id=1` | Facultades; el filtro es opcional | Estructura académica (HU-001) |
+| `GET /api/departamentos?institucion_id=1` | Departamentos; el filtro es opcional | Estructura académica (HU-001) |
+| `GET /api/programas` | Programas con su facultad o departamento y sus asignaturas | Registro de usuarios (HU-003) y estructura (HU-001) |
 | `GET /api/usuarios?rol=DOCENTE` | Usuarios; `rol` es opcional | Elegir el evaluador (HU-007) |
 | `GET /api/equipos` | Equipos con sus integrantes | Formulario de inscripción (HU-005) |
 | `GET /api/ferias` | Ferias con fechas y asignaturas participantes | Formulario de inscripción (HU-005) |
 | `GET /api/ferias/<id>/rubrica` | Escala y criterios con su peso (404 si no existe la feria, 422 si no tiene rúbrica) | Pantalla de calificación (HU-007) |
-| `GET /api/proyectos?feria_id=1` | Proyectos inscritos; `feria_id` es opcional | Listado de proyectos |
+| `GET /api/proyectos?feria_id=1` | Proyectos inscritos con sus evaluadores; `feria_id` es opcional | Listado de proyectos y asignación (HU-006) |
+| `GET /api/evaluadores/carga` | Cada docente con sus proyectos asignados, pendientes, borradores y confirmados | Carga por evaluador (HU-006) |
 | `GET /api/evaluaciones?evaluador_id=1` | Evaluaciones asignadas; el puntaje solo aparece si está CONFIRMADA (400 sin `evaluador_id`) | "Mis proyectos por calificar" (HU-007) |
 
 ### Conectar el frontend (Vite) con la API
@@ -90,7 +110,7 @@ Con eso basta tener las dos terminales abiertas: `flask --app app run` y `npm ru
 ## Pruebas y análisis estático
 
 ```bash
-coverage run -m pytest      # 139 pruebas
+coverage run -m pytest      # 212 pruebas
 coverage report             # cobertura de líneas y de ramas (branch = true)
 coverage html               # reporte navegable en htmlcov/index.html
 pylint app tests            # análisis estático
@@ -118,5 +138,12 @@ GitHub Actions ejecuta las pruebas, la cobertura y Pylint en cada `push` a `main
   escala por defecto de 1.0 a 5.0; puntaje = Σ (nota × peso), redondeado a 2 decimales.
 - **Confirmación (RN007):** el puntaje solo se publica al confirmar; una evaluación
   confirmada no se puede modificar.
+- **Estructura académica (HU-001):** la institución exige nombre y NIT; la facultad
+  y el departamento exigen nombre y no se repiten dentro de la institución (sin
+  distinguir mayúsculas). El programa debe ir en una facultad o un departamento de
+  su misma institución; las columnas aceptan NULL para no romper el programa existente.
+- **Asignación de evaluadores (HU-006):** solo docentes; un evaluador no se asigna
+  dos veces al mismo proyecto (REQ-12). La solicitud es todo o nada: si un evaluador
+  falla, no se asigna ninguno. Cada asignación crea la evaluación PENDIENTE que usa HU-007.
 - **Duplicados simultáneos (RNF-02):** además de la consulta previa, la base de
   datos tiene restricciones UNIQUE y cada escritura va en una transacción.

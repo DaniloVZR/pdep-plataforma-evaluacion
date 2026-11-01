@@ -31,8 +31,28 @@ def _entero_positivo(nombre: str, obligatorio: bool) -> int | None:
 
 @consultas_bp.get("/programas")
 def listar_programas():
-    """Programas con sus asignaturas."""
+    """Programas con su facultad o departamento y sus asignaturas."""
     return jsonify(_repositorio().listar_programas())
+
+
+@consultas_bp.get("/instituciones")
+def listar_instituciones():
+    """HU-001 · Instituciones con contacto y dominios."""
+    return jsonify(_repositorio().listar_instituciones())
+
+
+@consultas_bp.get("/facultades")
+def listar_facultades():
+    """HU-001 · Facultades; ``?institucion_id=1`` filtra por institución."""
+    return jsonify(_repositorio().listar_unidades(
+        "facultad", _entero_positivo("institucion_id", False)))
+
+
+@consultas_bp.get("/departamentos")
+def listar_departamentos():
+    """HU-001 · Departamentos; ``?institucion_id=1`` filtra por institución."""
+    return jsonify(_repositorio().listar_unidades(
+        "departamento", _entero_positivo("institucion_id", False)))
 
 
 @consultas_bp.get("/usuarios")
@@ -72,8 +92,14 @@ def obtener_rubrica(feria_id: int):
 
 @consultas_bp.get("/proyectos")
 def listar_proyectos():
-    """Proyectos inscritos; ``?feria_id=1`` filtra por feria."""
+    """Proyectos inscritos con sus evaluadores; ``?feria_id=1`` filtra por feria."""
     return jsonify(_repositorio().listar_proyectos(_entero_positivo("feria_id", False)))
+
+
+@consultas_bp.get("/evaluadores/carga")
+def listar_carga_evaluadores():
+    """HU-006 · Proyectos asignados a cada docente (pendientes, borradores y confirmadas)."""
+    return jsonify(_repositorio().listar_carga_evaluadores())
 
 
 @consultas_bp.get("/evaluaciones")

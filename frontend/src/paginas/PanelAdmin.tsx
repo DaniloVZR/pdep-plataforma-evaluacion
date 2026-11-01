@@ -15,7 +15,14 @@ import {
 } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { listarFerias, listarProgramas, listarProyectos, listarUsuarios } from '../api/endpoints.ts'
+import {
+  listarCargaEvaluadores,
+  listarFerias,
+  listarInstituciones,
+  listarProgramas,
+  listarProyectos,
+  listarUsuarios,
+} from '../api/endpoints.ts'
 import { useConsulta } from '../hooks/useConsulta.ts'
 
 interface Modulo {
@@ -33,6 +40,8 @@ const cargarUsuarios = () => listarUsuarios()
 const cargarProgramas = () => listarProgramas()
 const cargarFerias = () => listarFerias()
 const cargarProyectos = () => listarProyectos()
+const cargarInstituciones = () => listarInstituciones()
+const cargarCarga = () => listarCargaEvaluadores()
 
 /** "3 Registrados" si ya se conoce la cantidad; solo "Registrados" mientras carga o si falla. */
 function conteo(n: number | null, singular: string, plural: string): string {
@@ -48,23 +57,26 @@ export function PanelAdmin() {
   const programas = useConsulta(cargarProgramas)
   const ferias = useConsulta(cargarFerias)
   const proyectos = useConsulta(cargarProyectos)
+  const instituciones = useConsulta(cargarInstituciones)
+  const carga = useConsulta(cargarCarga)
   const [aviso, setAviso] = useState('')
   const [hoy] = useState(fechaDeHoy)
 
   const estudiantes = usuarios.datos?.filter((u) => u.rol === 'ESTUDIANTE').length ?? null
   const docentes = usuarios.datos?.filter((u) => u.rol === 'DOCENTE').length ?? null
   const asignaturas = programas.datos?.reduce((suma, p) => suma + p.asignaturas.length, 0) ?? null
+  const conEvaluaciones = carga.datos?.filter((e) => e.asignados > 0).length ?? null
   const activas =
     ferias.datos?.filter((f) => f.fecha_inicio <= hoy && hoy <= f.fecha_fin).length ?? null
 
   const modulos: Modulo[] = [
-    { titulo: 'Instituciones', subtitulo: 'Gestión principal', etiqueta: 'CRUD', color: '#0A3D73', icono: Landmark },
-    { titulo: 'Facultades y Departamentos', subtitulo: 'Estructura interna', etiqueta: 'Configuración', color: '#6D28D9', icono: Network },
-    { titulo: 'Programas', subtitulo: 'Programas académicos', etiqueta: conteo(programas.datos?.length ?? null, 'Activo', 'Activos'), color: '#0F766E', icono: GraduationCap },
+    { titulo: 'Instituciones', subtitulo: 'Gestión principal', etiqueta: conteo(instituciones.datos?.length ?? null, 'Registrada', 'Registradas'), color: '#0A3D73', icono: Landmark, ruta: '/estructura/instituciones' },
+    { titulo: 'Facultades y Departamentos', subtitulo: 'Estructura interna', etiqueta: 'Configuración', color: '#6D28D9', icono: Network, ruta: '/estructura/facultades' },
+    { titulo: 'Programas', subtitulo: 'Programas académicos', etiqueta: conteo(programas.datos?.length ?? null, 'Activo', 'Activos'), color: '#0F766E', icono: GraduationCap, ruta: '/estructura/programas' },
     { titulo: 'Asignaturas', subtitulo: 'Materias vinculadas', etiqueta: conteo(asignaturas, 'Activa', 'Activas'), color: '#C2410C', icono: BookOpen },
     { titulo: 'Estudiantes', subtitulo: 'Participantes de proyectos', etiqueta: conteo(estudiantes, 'Registrado', 'Registrados'), color: '#1D4ED8', icono: Users, ruta: '/usuarios/nuevo' },
     { titulo: 'Docentes', subtitulo: 'Plantilla docente', etiqueta: conteo(docentes, 'Registrado', 'Registrados'), color: '#BE185D', icono: UserRound, ruta: '/usuarios/nuevo' },
-    { titulo: 'Evaluadores', subtitulo: 'Jurados asignados', etiqueta: 'Próximamente', color: '#047857', icono: UserCheck },
+    { titulo: 'Evaluadores', subtitulo: 'Jurados asignados', etiqueta: conteo(conEvaluaciones, 'Con proyectos', 'Con proyectos'), color: '#047857', icono: UserCheck, ruta: '/asignaciones' },
     { titulo: 'Ferias / Eventos', subtitulo: 'Organización de periodos', etiqueta: conteo(activas, 'Activa', 'Activas'), color: '#A21CAF', icono: CalendarDays },
     { titulo: 'Proyectos', subtitulo: 'Trabajos inscritos', etiqueta: conteo(proyectos.datos?.length ?? null, 'Inscrito', 'Inscritos'), color: '#0E7490', icono: FolderKanban, ruta: '/proyectos' },
     { titulo: 'Rúbricas', subtitulo: 'Criterios de evaluación', etiqueta: 'Configurables', color: '#4D7C0F', icono: ListChecks },

@@ -4,10 +4,13 @@ import { ETIQUETA_ROL, RUTA_INICIAL, useSesion, type RolSesion } from '../sesion
 import { CambiarVista } from './CambiarVista.tsx'
 import { Marca } from './Marca.tsx'
 
-const MENU: Record<RolSesion, { a: string; texto: string }[]> = {
+// `seccion: true` deja el enlace marcado también en sus subpáginas (estructura académica).
+const MENU: Record<RolSesion, { a: string; texto: string; seccion?: boolean }[]> = {
   ADMINISTRADOR: [
     { a: '/admin', texto: 'Panel' },
+    { a: '/estructura', texto: 'Estructura académica', seccion: true },
     { a: '/usuarios/nuevo', texto: 'Registrar usuario' },
+    { a: '/asignaciones', texto: 'Asignar evaluadores' },
     { a: '/proyectos', texto: 'Proyectos' },
   ],
   EVALUADOR: [
@@ -39,7 +42,7 @@ export function LayoutApp() {
           <Marca a={RUTA_INICIAL[sesion.rol]} />
           <nav className="menu" aria-label="Principal">
             {MENU[sesion.rol].map((enlace) => (
-              <NavLink key={enlace.a} to={enlace.a} end className="menu-enlace">
+              <NavLink key={enlace.a} to={enlace.a} end={!enlace.seccion} className="menu-enlace">
                 {enlace.texto}
               </NavLink>
             ))}

@@ -1,4 +1,4 @@
-/* Estilos de las pantallas de HU-003, HU-005, HU-007 y el listado de proyectos.
+/* Estilos de las pantallas de HU-001, HU-003, HU-005, HU-006, HU-007 y el listado de proyectos.
    Usan las variables de index.css para seguir la misma línea visual. */
 
 .pantalla {
@@ -287,4 +287,58 @@ textarea {
   .criterio {
     grid-template-columns: 1fr 6.5rem;
   }
+}
+
+/* ───────── HU-001 · Estructura académica ───────── */
+.pila {
+  display: grid;
+  gap: 1.25rem;
+}
+.rejilla-tarjetas {
+  gap: 1.25rem;
+  align-items: start;
+}
+.tarjeta > .tabla-contenedor,
+.tarjeta > .estado {
+  margin-top: 1.25rem;
+}
+.lista-simple {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--borde);
+}
+.lista-simple li {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+/* Menú rápido entre las pantallas de la estructura académica */
+.pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  width: fit-content;
+  max-width: 100%;
+}
+.pestana {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: var(--texto-suave);
+  text-decoration: none;
+}
+.pestana:hover {
+  color: var(--azul);
+}
+.pestana.active {
+  background: var(--azul-tenue);
+  color: var(--azul);
 }

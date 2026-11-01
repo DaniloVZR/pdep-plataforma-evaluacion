@@ -7,16 +7,22 @@ RNF-02) y el error de ``sqlite3`` se traduce a un error del dominio.
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import date, datetime
 import logging
 import sqlite3
 
 from app.dominio.errores import ConflictoUnicidadError, ErrorPersistencia
 from app.dominio.modelos import (
+    Asignacion,
     Criterio,
+    Departamento,
     EstadoEvaluacion,
     Evaluacion,
+    Facultad,
     Feria,
+    Institucion,
+    Programa,
     Proyecto,
     Rubrica,
     Usuario,
@@ -262,3 +268,110 @@ class SqliteEvaluacionRepositorio:
                  for criterio_id, nota in evaluacion.notas.items()],
             )
         return evaluacion
+
+
+class SqliteEstructuraRepositorio:
+    """Instituciones, facultades, departamentos y programas (HU-001)."""
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def _institucion_de(self, tabla: str, fila_id: int) -> int | None:
+        fila = self._conexion.execute(
+            f"SELECT institucion_id FROM {tabla} WHERE id = ?", (fila_id,)).fetchone()
+        return None if fila is None else fila["institucion_id"]
+
+    def existe_institucion(self, institucion_id: int) -> bool:
+        """``True`` si la institución existe."""
+        fila = self._conexion.execute(
+            "SELECT 1 FROM institucion WHERE id = ?", (institucion_id,)).fetchone()
+        return fila is not None
+
+    def institucion_de_facultad(self, facultad_id: int) -> int | None:
+        """Id de la institución de la facultad, o ``None`` si no existe."""
+        return self._institucion_de("facultad", facultad_id)
+
+    def institucion_de_departamento(self, departamento_id: int) -> int | None:
+        """Id de la institución del departamento, o ``None`` si no existe."""
+        return self._institucion_de("departamento", departamento_id)
+
+    def guardar_institucion(self, institucion: Institucion) -> Institucion:
+        """Inserta la institución y su dominio en una sola transacción."""
+        with transaccion(self._conexion) as conexion:
+            cursor = conexion.execute(
+                "INSERT INTO institucion (nombre, nit, correo_contacto, telefono) "
+                "VALUES (?, ?, ?, ?)",
+                (institucion.nombre, institucion.nit, institucion.correo_contacto,
+                 institucion.telefono),
+            )
+            if institucion.dominio:
+                conexion.execute(
+                    "INSERT INTO dominio_institucion (institucion_id, dominio) VALUES (?, ?)",
+                    (cursor.lastrowid, institucion.dominio))
+        return replace(institucion, id=cursor.lastrowid)
+
+    def guardar_facultad(self, facultad: Facultad) -> Facultad:
+        """Inserta la facultad."""
+        with transaccion(self._conexion) as conexion:
+            cursor = conexion.execute(
+                "INSERT INTO facultad (institucion_id, nombre) VALUES (?, ?)",
+                (facultad.institucion_id, facultad.nombre))
+        return replace(facultad, id=cursor.lastrowid)
+
+    def guardar_departamento(self, departamento: Departamento) -> Departamento:
+        """Inserta el departamento."""
+        with transaccion(self._conexion) as conexion:
+            cursor = conexion.execute(
+                "INSERT INTO departamento (institucion_id, nombre) VALUES (?, ?)",
+                (departamento.institucion_id, departamento.nombre))
+        return replace(departamento, id=cursor.lastrowid)
+
+    def guardar_programa(self, programa: Programa) -> Programa:
+        """Inserta el programa."""
+        with transaccion(self._conexion) as conexion:
+            cursor = conexion.execute(
+                "INSERT INTO programa (institucion_id, facultad_id, departamento_id, codigo, "
+                "nombre) VALUES (?, ?, ?, ?, ?)",
+                (programa.institucion_id, programa.facultad_id, programa.departamento_id,
+                 programa.codigo, programa.nombre))
+        return replace(programa, id=cursor.lastrowid)
+
+
+class SqliteAsignacionRepositorio:
+    """Asignación de evaluadores a proyectos (HU-006)."""
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def existe_proyecto(self, proyecto_id: int) -> bool:
+        """``True`` si el proyecto existe."""
+        fila = self._conexion.execute(
+            "SELECT 1 FROM proyecto WHERE id = ?", (proyecto_id,)).fetchone()
+        return fila is not None
+
+    def roles_de_usuarios(self, usuario_ids: tuple[int, ...]) -> dict[int, str]:
+        """``{id: rol}`` de los usuarios que existen. Una sola consulta con ``IN``."""
+        filas = self._conexion.execute(
+            f"SELECT id, rol FROM usuario WHERE id IN ({_marcadores(len(usuario_ids))})",
+            usuario_ids,
+        ).fetchall()
+        return {fila["id"]: fila["rol"] for fila in filas}
+
+    def evaluadores_asignados(self, proyecto_id: int) -> frozenset[int]:
+        """Evaluadores que ya tienen una evaluación del proyecto."""
+        filas = self._conexion.execute(
+            "SELECT evaluador_id FROM evaluacion WHERE proyecto_id = ?",
+            (proyecto_id,)).fetchall()
+        return frozenset(fila["evaluador_id"] for fila in filas)
+
+    def asignar(self, proyecto_id: int,
+                evaluador_ids: tuple[int, ...]) -> tuple[Asignacion, ...]:
+        """Inserta una evaluación PENDIENTE por evaluador; si una falla, no queda ninguna."""
+        asignaciones = []
+        with transaccion(self._conexion) as conexion:
+            for evaluador_id in evaluador_ids:
+                cursor = conexion.execute(
+                    "INSERT INTO evaluacion (proyecto_id, evaluador_id) VALUES (?, ?)",
+                    (proyecto_id, evaluador_id))
+                asignaciones.append(Asignacion(cursor.lastrowid, proyecto_id, evaluador_id))
+        return tuple(asignaciones)
