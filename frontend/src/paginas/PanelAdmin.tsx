@@ -81,7 +81,7 @@ export function PanelAdmin() {
     { titulo: 'Proyectos', subtitulo: 'Trabajos inscritos', etiqueta: conteo(proyectos.datos?.length ?? null, 'Inscrito', 'Inscritos'), color: '#0E7490', icono: FolderKanban, ruta: '/proyectos' },
     { titulo: 'Rúbricas', subtitulo: 'Criterios de evaluación', etiqueta: 'Configurables', color: '#4D7C0F', icono: ListChecks, ruta: '/ferias' },
     { titulo: 'Evaluaciones', subtitulo: 'Calificaciones y notas', etiqueta: 'Seguimiento', color: '#4338CA', icono: ClipboardCheck },
-    { titulo: 'Reportes', subtitulo: 'Resultados consolidados', etiqueta: 'Generar PDF/Excel', color: '#374151', icono: FileText },
+    { titulo: 'Reportes', subtitulo: 'Resultados consolidados', etiqueta: 'Por feria, asignatura o programa', color: '#374151', icono: FileText, ruta: '/reportes' },
   ]
 
   return (

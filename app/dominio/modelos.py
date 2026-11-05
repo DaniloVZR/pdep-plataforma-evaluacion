@@ -1,4 +1,4 @@
-"""Entidades del dominio que usan HU-001 a HU-007 y HU-009.
+"""Entidades del dominio que usan HU-001 a HU-007, HU-009 y HU-010.
 
 Son ``dataclasses`` inmutables: no conocen la base de datos ni Flask, por lo
 que su lógica se prueba con objetos creados en memoria.
@@ -290,3 +290,259 @@ class ResultadoProyecto:
     feria: str
     equipo: str
     evaluaciones: tuple[ResultadoEvaluacion, ...] = ()
+
+
+class Agrupacion(str, Enum):
+    """Cómo se agrupa el reporte de resultados (HU-010, REQ-19)."""
+
+    FERIA = "feria"
+    ASIGNATURA = "asignatura"
+    PROGRAMA = "programa"
+
+
+@dataclass(frozen=True)
+class FiltrosReporte:
+    """Filtros del reporte (HU-010). Un id en ``None`` significa "sin filtrar por eso"."""
+
+    agrupar_por: Agrupacion = Agrupacion.FERIA
+    feria_id: int | None = None
+    asignatura_id: int | None = None
+    programa_id: int | None = None
+
+
+# Escala de 1 a 5 de las rúbricas (HU-004): 3.0 aprueba, como en la institución.
+NOTA_APROBATORIA = 3.0
+
+
+class NivelDesempeno(str, Enum):
+    """Nivel del puntaje consolidado de un proyecto (HU-010)."""
+
+    EXCELENTE = "EXCELENTE"         # 4.5 a 5.0
+    BUENO = "BUENO"                 # 4.0 a 4.49
+    ACEPTABLE = "ACEPTABLE"         # 3.0 a 3.99
+    INSUFICIENTE = "INSUFICIENTE"   # menos de 3.0: reprobado
+
+    @classmethod
+    def de(cls, puntaje: float) -> "NivelDesempeno":
+        """Nivel que corresponde al puntaje."""
+        if puntaje >= 4.5:
+            return cls.EXCELENTE
+        if puntaje >= 4.0:
+            return cls.BUENO
+        if puntaje >= NOTA_APROBATORIA:
+            return cls.ACEPTABLE
+        return cls.INSUFICIENTE
+
+
+@dataclass(frozen=True)
+class Distribucion:
+    """Cuántos proyectos quedaron en cada nivel de desempeño (HU-010)."""
+
+    excelente: int = 0
+    bueno: int = 0
+    aceptable: int = 0
+    insuficiente: int = 0
+
+    @classmethod
+    def de_puntajes(cls, puntajes: list[float]) -> "Distribucion":
+        """Cuenta los puntajes por nivel."""
+        niveles = [NivelDesempeno.de(p) for p in puntajes]
+        return cls(*(niveles.count(nivel) for nivel in NivelDesempeno))
+
+    @property
+    def aprobados(self) -> int:
+        """Proyectos con puntaje de 3.0 o más."""
+        return self.excelente + self.bueno + self.aceptable
+
+    @property
+    def reprobados(self) -> int:
+        """Proyectos con puntaje menor que 3.0."""
+        return self.insuficiente
+
+
+@dataclass(frozen=True)
+class AsignaturaReporte:
+    """Asignatura de un proyecto con el programa al que pertenece (HU-010)."""
+
+    id: int
+    nombre: str
+    programa_id: int
+    programa: str
+
+
+@dataclass(frozen=True)
+class NotaCriterio:
+    """Nota de un criterio de la rúbrica, o el promedio de varias (HU-010)."""
+
+    criterio: str
+    peso: float
+    nota: float
+
+
+def promediar_criterios(notas: list[NotaCriterio]) -> tuple[NotaCriterio, ...]:
+    """Promedio por criterio, en el orden en que aparece cada uno.
+
+    Se agrupa por nombre porque, al agrupar por asignatura o programa, un grupo puede
+    reunir proyectos de ferias con rúbricas distintas.
+    """
+    por_criterio: dict[str, list[NotaCriterio]] = {}
+    for nota in notas:
+        por_criterio.setdefault(nota.criterio, []).append(nota)
+    return tuple(
+        NotaCriterio(nombre, lista[0].peso, round(sum(n.nota for n in lista) / len(lista), 2))
+        for nombre, lista in por_criterio.items())
+
+
+@dataclass(frozen=True)
+class EvaluacionReporte:
+    """Una evaluación tal como la usa el reporte: estado, puntaje, notas y comentario."""
+
+    evaluador: str
+    estado: EstadoEvaluacion
+    puntaje_final: float | None = None
+    fecha_confirmacion: datetime | None = None
+    retroalimentacion: str = ""
+    notas: tuple[NotaCriterio, ...] = ()
+
+
+@dataclass(frozen=True)
+class ProyectoReporte:
+    """Proyecto con sus integrantes, asignaturas y todas sus evaluaciones (HU-010)."""
+
+    proyecto_id: int
+    proyecto: str
+    equipo: str
+    modalidad: Modalidad
+    feria_id: int
+    feria: str
+    integrantes: tuple[str, ...] = ()
+    asignaturas: tuple[AsignaturaReporte, ...] = ()
+    evaluaciones: tuple[EvaluacionReporte, ...] = ()
+
+    def evaluacion_completa(self) -> bool:
+        """Criterio de aceptación 1: tiene evaluadores y TODAS sus evaluaciones están
+        confirmadas."""
+        return bool(self.evaluaciones) and all(
+            e.estado is EstadoEvaluacion.CONFIRMADA for e in self.evaluaciones)
+
+    def puntaje_consolidado(self) -> float | None:
+        """REQ-18: promedio de los puntajes de sus evaluadores; ``None`` si la evaluación
+        no está completa (ese proyecto no entra al reporte)."""
+        if not self.evaluacion_completa():
+            return None
+        puntajes = [e.puntaje_final for e in self.evaluaciones]
+        return round(sum(puntajes) / len(puntajes), 2)
+
+    def criterios(self) -> tuple[NotaCriterio, ...]:
+        """Promedio de cada criterio entre sus evaluadores."""
+        return promediar_criterios([n for e in self.evaluaciones for n in e.notas])
+
+
+@dataclass(frozen=True)
+class ProyectoConsolidado:
+    """Fila del reporte: un proyecto con su puntaje consolidado y su detalle (HU-010)."""
+
+    proyecto_id: int
+    proyecto: str
+    equipo: str
+    modalidad: Modalidad
+    feria: str
+    puntaje: float
+    integrantes: tuple[str, ...] = ()
+    asignaturas: tuple[str, ...] = ()
+    criterios: tuple[NotaCriterio, ...] = ()
+    evaluaciones: tuple[EvaluacionReporte, ...] = ()
+
+    @property
+    def nivel(self) -> NivelDesempeno:
+        """Nivel de desempeño del puntaje."""
+        return NivelDesempeno.de(self.puntaje)
+
+
+@dataclass(frozen=True)
+class GrupoReporte:
+    """Una feria, asignatura o programa del reporte con sus proyectos, de mayor a menor."""
+
+    id: int
+    nombre: str
+    proyectos: tuple[ProyectoConsolidado, ...]
+
+    def _puntajes(self) -> list[float]:
+        return [p.puntaje for p in self.proyectos]
+
+    @property
+    def promedio(self) -> float:
+        """Promedio de los puntajes del grupo. Un grupo siempre tiene al menos un proyecto."""
+        return round(sum(self._puntajes()) / len(self.proyectos), 2)
+
+    @property
+    def maximo(self) -> float:
+        """Puntaje más alto del grupo."""
+        return max(self._puntajes())
+
+    @property
+    def minimo(self) -> float:
+        """Puntaje más bajo del grupo."""
+        return min(self._puntajes())
+
+    @property
+    def distribucion(self) -> Distribucion:
+        """Proyectos del grupo por nivel de desempeño."""
+        return Distribucion.de_puntajes(self._puntajes())
+
+    @property
+    def criterios(self) -> tuple[NotaCriterio, ...]:
+        """Promedio de cada criterio en el grupo: fortalezas y debilidades."""
+        return promediar_criterios([c for p in self.proyectos for c in p.criterios])
+
+
+@dataclass(frozen=True)
+class ProyectoPendiente:
+    """Proyecto que no entra al reporte y las evaluaciones que le faltan (HU-010).
+
+    ``faltantes`` vacío significa que no tiene evaluadores asignados.
+    """
+
+    proyecto_id: int
+    proyecto: str
+    equipo: str
+    feria: str
+    confirmadas: int
+    total: int
+    faltantes: tuple[EvaluacionReporte, ...] = ()
+
+
+@dataclass(frozen=True)
+class AvanceEvaluacion:
+    """Avance de las evaluaciones de los proyectos que cumplen los filtros (HU-010)."""
+
+    total: int = 0
+    confirmadas: int = 0
+    borradores: int = 0
+    sin_empezar: int = 0
+    proyectos_sin_evaluador: int = 0
+
+    @property
+    def porcentaje(self) -> float:
+        """Porcentaje de evaluaciones confirmadas; 0 si no hay evaluaciones."""
+        return round(self.confirmadas * 100 / self.total, 1) if self.total else 0.0
+
+
+@dataclass(frozen=True)
+class Reporte:
+    """Reporte consolidado de resultados (HU-010, REQ-18 y REQ-19).
+
+    ``filtros_aplicados`` son pares ``(filtro, nombre)``, por ejemplo
+    ``("Feria", "Feria de Proyectos 2026-2")``; ``generado`` deja constancia de cuándo se
+    generó (RNF-06).
+    """
+
+    filtros: FiltrosReporte
+    filtros_aplicados: tuple[tuple[str, str], ...]
+    generado: datetime
+    grupos: tuple[GrupoReporte, ...]
+    consolidados: int
+    promedio_general: float | None
+    distribucion: Distribucion
+    avance: AvanceEvaluacion
+    pendientes: tuple[ProyectoPendiente, ...]

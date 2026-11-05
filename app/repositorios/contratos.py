@@ -19,6 +19,7 @@ from app.dominio.modelos import (
     Institucion,
     Programa,
     Proyecto,
+    ProyectoReporte,
     ResultadoProyecto,
     Rubrica,
     Usuario,
@@ -197,3 +198,25 @@ class ResultadoRepositorio(Protocol):
     def resultados_de_estudiante(self, usuario_id: int) -> tuple[ResultadoProyecto, ...]:
         """Proyectos de los equipos del estudiante con todas sus evaluaciones, sin ocultar
         nada: el servicio decide qué se publica (RN007)."""
+
+
+class ReporteRepositorio(Protocol):
+    """Datos del reporte de resultados (HU-010). Solo lectura."""
+
+    def nombre_feria(self, feria_id: int) -> str | None:
+        """Nombre de la feria, o ``None`` si no existe."""
+
+    def nombre_asignatura(self, asignatura_id: int) -> str | None:
+        """Nombre de la asignatura, o ``None`` si no existe."""
+
+    def nombre_programa(self, programa_id: int) -> str | None:
+        """Nombre del programa, o ``None`` si no existe."""
+
+    def proyectos_para_reporte(self, feria_id: int | None, asignatura_id: int | None,
+                               programa_id: int | None) -> tuple[ProyectoReporte, ...]:
+        """Proyectos que cumplen los filtros con sus integrantes y todas sus evaluaciones
+        (con notas por criterio), sin descartar ninguno.
+
+        Cada proyecto trae solo las asignaturas que cumplen los filtros de asignatura y de
+        programa. El servicio decide cuáles entran al reporte (REQ-18).
+        """

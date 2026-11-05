@@ -324,3 +324,105 @@ export interface ResultadoProyecto {
   equipo: string
   evaluaciones: ResultadoEvaluacion[]
 }
+
+// ───────────── HU-010 · GET /api/reportes ─────────────
+
+export type Agrupacion = 'feria' | 'asignatura' | 'programa'
+
+export interface FiltrosReporte {
+  agrupar_por: Agrupacion
+  feria_id?: number
+  asignatura_id?: number
+  programa_id?: number
+}
+
+export type NivelDesempeno = 'EXCELENTE' | 'BUENO' | 'ACEPTABLE' | 'INSUFICIENTE'
+
+/** Cuántos proyectos quedaron en cada nivel (3.0 aprueba). */
+export interface Distribucion {
+  excelente: number
+  bueno: number
+  aceptable: number
+  insuficiente: number
+  aprobados: number
+  reprobados: number
+}
+
+/** Nota de un criterio de la rúbrica; en el reporte es el promedio de los evaluadores. */
+export interface NotaCriterio {
+  criterio: string
+  /** Fracción entre 0 y 1. */
+  peso: number
+  nota: number
+}
+
+export interface EvaluacionDelReporte {
+  evaluador: string
+  estado: EstadoEvaluacion
+  puntaje_final: number | null
+  fecha_confirmacion: string | null
+  retroalimentacion: string
+}
+
+/** Proyecto con todas sus evaluaciones confirmadas; `puntaje` es el promedio de sus evaluadores. */
+export interface ProyectoConsolidado {
+  proyecto_id: number
+  proyecto: string
+  equipo: string
+  integrantes: string[]
+  modalidad: Modalidad
+  feria: string
+  asignaturas: string[]
+  puntaje: number
+  nivel: NivelDesempeno
+  criterios: NotaCriterio[]
+  evaluaciones: EvaluacionDelReporte[]
+}
+
+/** Una feria, asignatura o programa con sus proyectos, del puntaje más alto al más bajo. */
+export interface GrupoReporte {
+  id: number
+  nombre: string
+  cantidad: number
+  promedio: number
+  maximo: number
+  minimo: number
+  distribucion: Distribucion
+  criterios: NotaCriterio[]
+  proyectos: ProyectoConsolidado[]
+}
+
+/** Proyecto que no entra al reporte; `faltantes` vacío = no tiene evaluador asignado. */
+export interface ProyectoPendiente {
+  proyecto_id: number
+  proyecto: string
+  equipo: string
+  feria: string
+  confirmadas: number
+  total: number
+  faltantes: EvaluacionDelReporte[]
+}
+
+export interface Reporte {
+  agrupar_por: Agrupacion
+  filtros: { feria_id: number | null; asignatura_id: number | null; programa_id: number | null }
+  /** Fecha y hora en que se generó (ISO 8601). */
+  generado: string
+  resumen: {
+    proyectos_consolidados: number
+    /** Proyectos que cumplen los filtros pero les falta alguna evaluación confirmada. */
+    proyectos_pendientes: number
+    promedio_general: number | null
+  }
+  distribucion: Distribucion
+  avance: {
+    total: number
+    confirmadas: number
+    borradores: number
+    sin_empezar: number
+    proyectos_sin_evaluador: number
+    porcentaje: number
+  }
+  pendientes: ProyectoPendiente[]
+  grupos: GrupoReporte[]
+}

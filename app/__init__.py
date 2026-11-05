@@ -13,6 +13,7 @@ from app.controladores.estructura_controlador import estructura_bp
 from app.controladores.evaluacion_controlador import evaluaciones_bp
 from app.controladores.feria_controlador import ferias_bp
 from app.controladores.proyecto_controlador import proyectos_bp
+from app.controladores.reporte_controlador import reportes_bp
 from app.controladores.resultado_controlador import resultados_bp
 from app.controladores.sesion_controlador import sesion_bp
 from app.controladores.usuario_controlador import usuarios_bp
@@ -42,6 +43,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(ferias_bp)
     app.register_blueprint(asignaturas_bp)
     app.register_blueprint(resultados_bp)
+    app.register_blueprint(reportes_bp)
 
     @app.errorhandler(ErrorDominio)
     def manejar_error_dominio(error: ErrorDominio):

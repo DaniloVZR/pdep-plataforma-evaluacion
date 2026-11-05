@@ -25,6 +25,7 @@ También se agregan (cada historia completa: backend, pruebas y pantalla):
 |---|---|---|---|---|
 | HU-002 Registrar asignaturas y asociarlas a un programa | PDEP-6 | `POST /api/asignaturas`, `GET /api/asignaturas?programa_id=` | `RegistroAsignaturaServicio.registrar` | `/estructura/asignaturas` (administrador) |
 | HU-009 Consultar calificación y retroalimentación | PDEP-13 | `GET /api/resultados?estudiante_id=` | `ConsultaResultadosServicio.consultar` | `/resultados` (estudiante) |
+| HU-010 Consolidar y generar reportes de resultados | PDEP-14 | `GET /api/reportes?agrupar_por=&feria_id=&asignatura_id=&programa_id=`, `GET /api/reportes/excel` (mismos parámetros) | `ReporteServicio.generar`, `generar_excel` | `/reportes` (administrador) |
 
 Autores: Angelo Alexander Arango Graciano y Joimar Danilo Urrego David.
 
@@ -87,6 +88,7 @@ Todos los endpoints, menos `/api/login`, piden el token en el encabezado
 | `PUT /api/proyectos/<id>/evaluacion` | Evaluador, solo con su propio `evaluador_id` |
 | `GET /api/resultados?estudiante_id=` | Estudiante, solo con su propio id |
 | `GET /api/evaluaciones?evaluador_id=` | Evaluador, solo con su propio id |
+| `GET /api/reportes`, `GET /api/reportes/excel` | Administrador |
 | Los demás `GET` (listas) | Cualquier sesión |
 
 El administrador puede usar todos, porque con "Ver como" revisa la plataforma desde los
@@ -202,5 +204,21 @@ GitHub Actions ejecuta las pruebas, la cobertura y Pylint en cada `push` a `main
   devuelve los proyectos de los equipos del estudiante con cada evaluación; el puntaje y
   la retroalimentación solo salen si la evaluación está CONFIRMADA (RN007). Se muestran el
   evaluador y la fecha de confirmación (RNF-06). Solo un estudiante puede consultarlo (422).
+- **Reportes de resultados (HU-010):** `GET /api/reportes` consolida los puntajes (REQ-18)
+  y los agrupa por feria, asignatura o programa (`agrupar_por`, por defecto feria); también
+  filtra por `feria_id`, `asignatura_id` y `programa_id` (REQ-19). Un proyecto entra al
+  reporte solo si **todas** sus evaluaciones están CONFIRMADAS, y su puntaje es el promedio
+  de sus evaluadores; los demás se cuentan como pendientes. Un PIA aparece en cada una de
+  sus asignaturas. 400 si un filtro está mal escrito, 404 si lo filtrado no existe. La
+  consulta usa siempre cinco sentencias SQL, sin importar cuántos proyectos haya; una prueba
+  verifica 500 proyectos en menos de 5 segundos (RNF-01). Además trae:
+  - **Distribución de notas** por nivel (Excelente ≥ 4.5, Bueno ≥ 4.0, Aceptable ≥ 3.0,
+    Insuficiente < 3.0) con aprobados y reprobados, en total y por grupo.
+  - **Promedio por criterio** de la rúbrica, por proyecto y por grupo.
+  - **Avance de la evaluación**: evaluaciones confirmadas, en borrador y sin empezar, y los
+    proyectos pendientes con el evaluador que falta.
+  - **Detalle de cada proyecto**: integrantes, asignaturas y retroalimentación.
+  - `GET /api/reportes/excel` descarga lo mismo en un `.xlsx` (openpyxl) con las hojas
+    Resumen, Resultados, Por criterio, Retroalimentación y Pendientes.
 - **Duplicados simultáneos (RNF-02):** además de la consulta previa, la base de
   datos tiene restricciones UNIQUE y cada escritura va en una transacción.

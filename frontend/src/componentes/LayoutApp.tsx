@@ -13,6 +13,7 @@ const MENU: Record<RolSesion, { a: string; texto: string; seccion?: boolean }[]>
     { a: '/usuarios/nuevo', texto: 'Registrar usuario' },
     { a: '/asignaciones', texto: 'Asignar evaluadores' },
     { a: '/proyectos', texto: 'Proyectos' },
+    { a: '/reportes', texto: 'Reportes' },
   ],
   EVALUADOR: [
     { a: '/evaluaciones', texto: 'Mis evaluaciones' },

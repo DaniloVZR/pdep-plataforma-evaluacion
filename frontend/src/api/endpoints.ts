@@ -10,12 +10,14 @@ import type {
   EvaluacionAsignada,
   Feria,
   FeriaCreada,
+  FiltrosReporte,
   Institucion,
   InstitucionCreada,
   Programa,
   ProgramaCreado,
   Proyecto,
   ProyectoListado,
+  Reporte,
   RespuestaLogin,
   ResultadoProyecto,
   Rol,
@@ -119,3 +121,20 @@ export const listarCargaEvaluadores = () => api.get<CargaEvaluador[]>('/api/eval
 /** HU-009 · Proyectos del estudiante; puntaje y retroalimentación solo si está confirmada. */
 export const consultarResultados = (estudianteId: number) =>
   api.get<ResultadoProyecto[]>(`/api/resultados?estudiante_id=${estudianteId}`)
+
+/** Parámetros de la URL del reporte (HU-010); los filtros vacíos no se envían. */
+function parametrosReporte({ agrupar_por, feria_id, asignatura_id, programa_id }: FiltrosReporte) {
+  const parametros = new URLSearchParams({ agrupar_por })
+  if (feria_id) parametros.set('feria_id', String(feria_id))
+  if (asignatura_id) parametros.set('asignatura_id', String(asignatura_id))
+  if (programa_id) parametros.set('programa_id', String(programa_id))
+  return parametros
+}
+
+/** HU-010 · Reporte consolidado: solo proyectos con todas sus evaluaciones confirmadas. */
+export const generarReporte = (filtros: FiltrosReporte) =>
+  api.get<Reporte>(`/api/reportes?${parametrosReporte(filtros)}`)
+
+/** HU-010 · Descarga el mismo reporte como Excel (.xlsx). */
+export const descargarReporteExcel = (filtros: FiltrosReporte) =>
+  api.descargar(`/api/reportes/excel?${parametrosReporte(filtros)}`)
