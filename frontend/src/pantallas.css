@@ -400,3 +400,57 @@ textarea {
 .resultado-evaluacion .resultado-puntaje {
   font-size: 2.25rem;
 }
+
+/* HU-010 · Reportes de resultados */
+.rejilla-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 1.25rem;
+}
+.cifras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.cifra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-grande);
+}
+.cifra-valor {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--azul);
+  font-variant-numeric: tabular-nums;
+}
+.cifra-texto {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+.grupo-reporte {
+  /* Sin esto, la tabla ensancha la página en el celular en vez de desplazarse dentro. */
+  min-width: 0;
+}
+.grupo-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+.grupo-cabecera p {
+  margin: 0;
+}
+@media (max-width: 48rem) {
+  .rejilla-3,
+  .cifras {
+    grid-template-columns: 1fr;
+  }
+}

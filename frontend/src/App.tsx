@@ -17,6 +17,7 @@ import { ListadoProyectos } from './paginas/ListadoProyectos.tsx'
 import { MisEvaluaciones } from './paginas/MisEvaluaciones.tsx'
 import { MisResultados } from './paginas/MisResultados.tsx'
 import { RegistrarUsuario } from './paginas/RegistrarUsuario.tsx'
+import { Reportes } from './paginas/Reportes.tsx'
 import './pantallas.css'
 
 function NoEncontrada() {
@@ -94,6 +95,14 @@ export default function App() {
           element={
             <RequiereRol roles={['ADMINISTRADOR']}>
               <Ferias />
+            </RequiereRol>
+          }
+        />
+        <Route
+          path="reportes"
+          element={
+            <RequiereRol roles={['ADMINISTRADOR']}>
+              <Reportes />
             </RequiereRol>
           }
         />

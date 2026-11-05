@@ -18,6 +18,7 @@ from app.dominio.modelos import (
     NOTA_MINIMA,
     Asignacion,
     Asignatura,
+    AsignaturaReporte,
     Criterio,
     Cuenta,
     Departamento,
@@ -26,8 +27,10 @@ from app.dominio.modelos import (
     Facultad,
     Feria,
     Institucion,
+    Modalidad,
     Programa,
     Proyecto,
+    ProyectoReporte,
     ResultadoEvaluacion,
     ResultadoProyecto,
     RolCuenta,
@@ -510,4 +513,83 @@ class SqliteResultadoRepositorio:
         return tuple(
             ResultadoProyecto(p["id"], p["nombre"], p["feria"], p["equipo"],
                               tuple(por_proyecto[p["id"]]))
+            for p in proyectos)
+
+
+class SqliteReporteRepositorio:
+    """Datos del reporte de resultados (HU-010). Solo lectura.
+
+    Usa siempre tres consultas (proyectos, asignaturas y evaluaciones), sin importar cuántos
+    proyectos tenga la feria; así una feria de 500 proyectos no hace 500 consultas (RNF-01).
+    """
+
+    def __init__(self, conexion: sqlite3.Connection) -> None:
+        self._conexion = conexion
+
+    def _existe(self, tabla: str, identificador: int) -> bool:
+        return self._conexion.execute(
+            f"SELECT 1 FROM {tabla} WHERE id = ?", (identificador,)).fetchone() is not None
+
+    def existe_feria(self, feria_id: int) -> bool:
+        """``True`` si la feria existe."""
+        return self._existe("feria", feria_id)
+
+    def existe_asignatura(self, asignatura_id: int) -> bool:
+        """``True`` si la asignatura existe."""
+        return self._existe("asignatura", asignatura_id)
+
+    def existe_programa(self, programa_id: int) -> bool:
+        """``True`` si el programa existe."""
+        return self._existe("programa", programa_id)
+
+    def proyectos_para_reporte(self, feria_id: int | None, asignatura_id: int | None,
+                               programa_id: int | None) -> tuple[ProyectoReporte, ...]:
+        """Proyectos que cumplen los filtros, con sus asignaturas y todas sus evaluaciones."""
+        # Condiciones sobre la asignatura (a), compartidas por las dos primeras consultas.
+        condiciones_a, parametros_a = ["1 = 1"], []
+        if asignatura_id is not None:
+            condiciones_a.append("a.id = ?")
+            parametros_a.append(asignatura_id)
+        if programa_id is not None:
+            condiciones_a.append("a.programa_id = ?")
+            parametros_a.append(programa_id)
+        filtro_a = " AND ".join(condiciones_a)
+        filtro_feria, parametros_feria = ("p.feria_id = ?", [feria_id]) \
+            if feria_id is not None else ("1 = 1", [])
+
+        proyectos = self._conexion.execute(
+            "SELECT p.id, p.nombre, e.nombre AS equipo, p.modalidad, p.feria_id, "
+            "f.nombre AS feria FROM proyecto p JOIN equipo e ON e.id = p.equipo_id "
+            "JOIN feria f ON f.id = p.feria_id "
+            f"WHERE {filtro_feria} AND EXISTS (SELECT 1 FROM proyecto_asignatura pa "
+            "JOIN asignatura a ON a.id = pa.asignatura_id "
+            f"WHERE pa.proyecto_id = p.id AND {filtro_a}) ORDER BY p.id",
+            (*parametros_feria, *parametros_a)).fetchall()
+        asignaturas = self._conexion.execute(
+            "SELECT pa.proyecto_id, a.id, a.nombre, a.programa_id, pr.nombre AS programa "
+            "FROM proyecto_asignatura pa JOIN proyecto p ON p.id = pa.proyecto_id "
+            "JOIN asignatura a ON a.id = pa.asignatura_id "
+            "JOIN programa pr ON pr.id = a.programa_id "
+            f"WHERE {filtro_feria} AND {filtro_a} ORDER BY a.nombre",
+            (*parametros_feria, *parametros_a)).fetchall()
+        evaluaciones = self._conexion.execute(
+            "SELECT ev.proyecto_id, ev.estado, ev.puntaje_final FROM evaluacion ev "
+            f"JOIN proyecto p ON p.id = ev.proyecto_id WHERE {filtro_feria} ORDER BY ev.id",
+            tuple(parametros_feria)).fetchall()
+
+        asignaturas_de: dict[int, list[AsignaturaReporte]] = {p["id"]: [] for p in proyectos}
+        for fila in asignaturas:
+            asignaturas_de[fila["proyecto_id"]].append(AsignaturaReporte(
+                fila["id"], fila["nombre"], fila["programa_id"], fila["programa"]))
+        evaluaciones_de: dict[int, list] = {p["id"]: [] for p in proyectos}
+        for fila in evaluaciones:
+            if fila["proyecto_id"] in evaluaciones_de:
+                evaluaciones_de[fila["proyecto_id"]].append(
+                    (EstadoEvaluacion(fila["estado"]), fila["puntaje_final"]))
+        return tuple(
+            ProyectoReporte(
+                proyecto_id=p["id"], proyecto=p["nombre"], equipo=p["equipo"],
+                modalidad=Modalidad(p["modalidad"]), feria_id=p["feria_id"], feria=p["feria"],
+                asignaturas=tuple(asignaturas_de[p["id"]]),
+                evaluaciones=tuple(evaluaciones_de[p["id"]]))
             for p in proyectos)

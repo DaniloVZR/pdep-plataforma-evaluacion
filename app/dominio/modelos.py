@@ -1,4 +1,4 @@
-"""Entidades del dominio que usan HU-001 a HU-007 y HU-009.
+"""Entidades del dominio que usan HU-001 a HU-007, HU-009 y HU-010.
 
 Son ``dataclasses`` inmutables: no conocen la base de datos ni Flask, por lo
 que su lógica se prueba con objetos creados en memoria.
@@ -290,3 +290,113 @@ class ResultadoProyecto:
     feria: str
     equipo: str
     evaluaciones: tuple[ResultadoEvaluacion, ...] = ()
+
+
+class Agrupacion(str, Enum):
+    """Cómo se agrupa el reporte de resultados (HU-010, REQ-19)."""
+
+    FERIA = "feria"
+    ASIGNATURA = "asignatura"
+    PROGRAMA = "programa"
+
+
+@dataclass(frozen=True)
+class FiltrosReporte:
+    """Filtros del reporte (HU-010). Un id en ``None`` significa "sin filtrar por eso"."""
+
+    agrupar_por: Agrupacion = Agrupacion.FERIA
+    feria_id: int | None = None
+    asignatura_id: int | None = None
+    programa_id: int | None = None
+
+
+@dataclass(frozen=True)
+class AsignaturaReporte:
+    """Asignatura de un proyecto con el programa al que pertenece (HU-010)."""
+
+    id: int
+    nombre: str
+    programa_id: int
+    programa: str
+
+
+@dataclass(frozen=True)
+class ProyectoReporte:
+    """Proyecto con el estado y el puntaje de cada una de sus evaluaciones (HU-010).
+
+    ``evaluaciones`` son pares ``(estado, puntaje_final)``.
+    """
+
+    proyecto_id: int
+    proyecto: str
+    equipo: str
+    modalidad: Modalidad
+    feria_id: int
+    feria: str
+    asignaturas: tuple[AsignaturaReporte, ...] = ()
+    evaluaciones: tuple[tuple[EstadoEvaluacion, float | None], ...] = ()
+
+    def puntaje_consolidado(self) -> float | None:
+        """REQ-18: promedio de los puntajes cuando TODAS sus evaluaciones están confirmadas.
+
+        Devuelve ``None`` si el proyecto no tiene evaluadores o si alguna evaluación sigue
+        pendiente o en borrador: ese proyecto no entra al reporte (criterio de aceptación 1).
+        """
+        if not self.evaluaciones:
+            return None
+        if any(estado is not EstadoEvaluacion.CONFIRMADA for estado, _ in self.evaluaciones):
+            return None
+        puntajes = [puntaje for _, puntaje in self.evaluaciones]
+        return round(sum(puntajes) / len(puntajes), 2)
+
+
+@dataclass(frozen=True)
+class ProyectoConsolidado:
+    """Fila del reporte: un proyecto con su puntaje consolidado (HU-010)."""
+
+    proyecto_id: int
+    proyecto: str
+    equipo: str
+    modalidad: Modalidad
+    feria: str
+    puntaje: float
+    evaluaciones: int
+
+
+@dataclass(frozen=True)
+class GrupoReporte:
+    """Una feria, asignatura o programa del reporte con sus proyectos, de mayor a menor."""
+
+    id: int
+    nombre: str
+    proyectos: tuple[ProyectoConsolidado, ...]
+
+    @property
+    def promedio(self) -> float:
+        """Promedio de los puntajes del grupo. Un grupo siempre tiene al menos un proyecto."""
+        return round(sum(p.puntaje for p in self.proyectos) / len(self.proyectos), 2)
+
+    @property
+    def maximo(self) -> float:
+        """Puntaje más alto del grupo."""
+        return max(p.puntaje for p in self.proyectos)
+
+    @property
+    def minimo(self) -> float:
+        """Puntaje más bajo del grupo."""
+        return min(p.puntaje for p in self.proyectos)
+
+
+@dataclass(frozen=True)
+class Reporte:
+    """Reporte consolidado de resultados (HU-010, REQ-18 y REQ-19).
+
+    ``pendientes`` cuenta los proyectos que cumplen los filtros pero no entran al reporte
+    porque les falta alguna evaluación confirmada.
+    """
+
+    filtros: FiltrosReporte
+    grupos: tuple[GrupoReporte, ...]
+    consolidados: int
+    pendientes: int
+    promedio_general: float | None

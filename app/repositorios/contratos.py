@@ -19,6 +19,7 @@ from app.dominio.modelos import (
     Institucion,
     Programa,
     Proyecto,
+    ProyectoReporte,
     ResultadoProyecto,
     Rubrica,
     Usuario,
@@ -197,3 +198,24 @@ class ResultadoRepositorio(Protocol):
     def resultados_de_estudiante(self, usuario_id: int) -> tuple[ResultadoProyecto, ...]:
         """Proyectos de los equipos del estudiante con todas sus evaluaciones, sin ocultar
         nada: el servicio decide qué se publica (RN007)."""
+
+
+class ReporteRepositorio(Protocol):
+    """Datos del reporte de resultados (HU-010). Solo lectura."""
+
+    def existe_feria(self, feria_id: int) -> bool:
+        """``True`` si la feria existe."""
+
+    def existe_asignatura(self, asignatura_id: int) -> bool:
+        """``True`` si la asignatura existe."""
+
+    def existe_programa(self, programa_id: int) -> bool:
+        """``True`` si el programa existe."""
+
+    def proyectos_para_reporte(self, feria_id: int | None, asignatura_id: int | None,
+                               programa_id: int | None) -> tuple[ProyectoReporte, ...]:
+        """Proyectos que cumplen los filtros con todas sus evaluaciones, sin descartar ninguna.
+
+        Cada proyecto trae solo las asignaturas que cumplen los filtros de asignatura y de
+        programa. El servicio decide cuáles entran al reporte (REQ-18).
+        """

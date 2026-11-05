@@ -324,3 +324,49 @@ export interface ResultadoProyecto {
   equipo: string
   evaluaciones: ResultadoEvaluacion[]
 }
+
+// ───────────── HU-010 · GET /api/reportes ─────────────
+
+export type Agrupacion = 'feria' | 'asignatura' | 'programa'
+
+export interface FiltrosReporte {
+  agrupar_por: Agrupacion
+  feria_id?: number
+  asignatura_id?: number
+  programa_id?: number
+}
+
+/** Proyecto con todas sus evaluaciones confirmadas; `puntaje` es el promedio de sus evaluadores. */
+export interface ProyectoConsolidado {
+  proyecto_id: number
+  proyecto: string
+  equipo: string
+  modalidad: Modalidad
+  feria: string
+  puntaje: number
+  /** Cantidad de evaluaciones (todas confirmadas) que se promediaron. */
+  evaluaciones: number
+}
+
+/** Una feria, asignatura o programa con sus proyectos, del puntaje más alto al más bajo. */
+export interface GrupoReporte {
+  id: number
+  nombre: string
+  cantidad: number
+  promedio: number
+  maximo: number
+  minimo: number
+  proyectos: ProyectoConsolidado[]
+}
+
+export interface Reporte {
+  agrupar_por: Agrupacion
+  filtros: { feria_id: number | null; asignatura_id: number | null; programa_id: number | null }
+  resumen: {
+    proyectos_consolidados: number
+    /** Proyectos que cumplen los filtros pero les falta alguna evaluación confirmada. */
+    proyectos_pendientes: number
+    promedio_general: number | null
+  }
+  grupos: GrupoReporte[]
+}
