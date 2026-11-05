@@ -203,18 +203,19 @@ class ResultadoRepositorio(Protocol):
 class ReporteRepositorio(Protocol):
     """Datos del reporte de resultados (HU-010). Solo lectura."""
 
-    def existe_feria(self, feria_id: int) -> bool:
-        """``True`` si la feria existe."""
+    def nombre_feria(self, feria_id: int) -> str | None:
+        """Nombre de la feria, o ``None`` si no existe."""
 
-    def existe_asignatura(self, asignatura_id: int) -> bool:
-        """``True`` si la asignatura existe."""
+    def nombre_asignatura(self, asignatura_id: int) -> str | None:
+        """Nombre de la asignatura, o ``None`` si no existe."""
 
-    def existe_programa(self, programa_id: int) -> bool:
-        """``True`` si el programa existe."""
+    def nombre_programa(self, programa_id: int) -> str | None:
+        """Nombre del programa, o ``None`` si no existe."""
 
     def proyectos_para_reporte(self, feria_id: int | None, asignatura_id: int | None,
                                programa_id: int | None) -> tuple[ProyectoReporte, ...]:
-        """Proyectos que cumplen los filtros con todas sus evaluaciones, sin descartar ninguna.
+        """Proyectos que cumplen los filtros con sus integrantes y todas sus evaluaciones
+        (con notas por criterio), sin descartar ninguno.
 
         Cada proyecto trae solo las asignaturas que cumplen los filtros de asignatura y de
         programa. El servicio decide cuáles entran al reporte (REQ-18).
