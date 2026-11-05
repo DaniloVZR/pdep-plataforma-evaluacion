@@ -38,14 +38,24 @@ def ejecutar_script(conexion: sqlite3.Connection, nombre: str) -> None:
 
 @click.command("init-db")
 @click.option("--demo", is_flag=True, help="Carga además los datos de demostración.")
+@click.option("--ejemplo", is_flag=True,
+              help="Carga los datos de demostración y, encima, varias ferias, equipos, "
+                   "proyectos y evaluaciones para probar a mano.")
 @with_appcontext
-def comando_init_db(demo: bool) -> None:
-    """Borra y crea las tablas. Con --demo carga datos de ejemplo."""
+def comando_init_db(demo: bool, ejemplo: bool) -> None:
+    """Borra y crea las tablas. Con --demo carga los datos mínimos que usan las pruebas;
+    con --ejemplo, además, los datos de ejemplo compartidos (datos_ejemplo.sql)."""
     conexion = obtener_conexion()
     ejecutar_script(conexion, "schema.sql")
-    if demo:
+    if demo or ejemplo:
         ejecutar_script(conexion, "datos_demo.sql")
-    click.echo("Base de datos inicializada" + (" con datos de demostración." if demo else "."))
+    if ejemplo:
+        ejecutar_script(conexion, "datos_ejemplo.sql")
+        click.echo("Base de datos inicializada con datos de ejemplo.")
+    elif demo:
+        click.echo("Base de datos inicializada con datos de demostración.")
+    else:
+        click.echo("Base de datos inicializada.")
 
 
 def registrar_en(app: Flask) -> None:

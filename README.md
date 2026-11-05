@@ -55,9 +55,22 @@ python -m venv .venv
 # Windows: .venv\Scripts\activate    Linux/macOS: source .venv/bin/activate
 pip install -r requirements-dev.txt
 
-flask --app app init-db --demo   # crea instance/pdep.sqlite3 con datos de ejemplo
-flask --app app run              # http://127.0.0.1:5000
+flask --app app init-db --demo     # crea instance/pdep.sqlite3 con los datos mínimos
+flask --app app init-db --ejemplo  # o: datos mínimos + datos de ejemplo para probar a mano
+flask --app app run                # http://127.0.0.1:5000
 ```
+
+`init-db` borra y vuelve a crear todas las tablas: lo registrado desde la app se pierde.
+La base (`instance/`) no se sube al repositorio; cada uno tiene la suya.
+
+- `--demo` carga `app/datos_demo.sql`: lo mínimo (una feria, un proyecto PENDIENTE y una
+  cuenta por rol). Las pruebas automáticas usan este archivo, así que no conviene cambiarlo.
+- `--ejemplo` carga además `app/datos_ejemplo.sql`, compartido por el equipo: 2 ferias con
+  rúbricas distintas, 3 programas, 3 docentes más, 10 estudiantes, 6 equipos y 10 proyectos
+  con evaluaciones confirmadas de todos los niveles, una en borrador, una sin empezar y un
+  proyecto sin evaluador. Para ver con más datos las pantallas (sobre todo Reportes), se
+  agregan aquí; `tests/integracion/test_datos_ejemplo.py` revisa que los puntajes coincidan
+  con la rúbrica y que cada proyecto respete su feria y su modalidad.
 
 ### Cuentas de prueba (RNF-03)
 
@@ -69,6 +82,8 @@ texto plano porque es un prototipo académico; no use contraseñas reales.
 | Administrador | `admin@pascualbravo.edu.co` | `admin123` |
 | Evaluador (docente 1) | `evaluador@pascualbravo.edu.co` | `evaluador123` |
 | Estudiante (usuario 2, Equipo Demo) | `estudiante@pascualbravo.edu.co` | `estudiante123` |
+| Evaluadora (docente 3, solo con `--ejemplo`) | `carolina.restrepo@pascualbravo.edu.co` | `evaluador123` |
+| Estudiante (usuario 6, solo con `--ejemplo`) | `laura.gomez@pascualbravo.edu.co` | `estudiante123` |
 
 `POST /api/login` con `{"correo", "clave"}` responde 200 con `{"usuario_id", "nombre", "rol", "token"}`,
 400 si falta un dato y 401 si el correo o la clave no coinciden. Las cuentas están en la tabla
