@@ -280,16 +280,13 @@ class SqliteEvaluacionRepositorio:
         )
 
     def guardar_calificacion(self, evaluacion: Evaluacion) -> Evaluacion:
-        """Actualiza la evaluación y reemplaza sus notas en una sola transacción."""
+        """Reemplaza las notas y actualiza la evaluación en una sola transacción.
+
+        Las notas van primero: si la evaluación queda CONFIRMADA, los triggers de HU-008
+        ya no dejan tocar sus notas.
+        """
         fecha = evaluacion.fecha_confirmacion
         with transaccion(self._conexion) as conexion:
-            conexion.execute(
-                "UPDATE evaluacion SET estado = ?, puntaje_final = ?, fecha_confirmacion = ?, "
-                "retroalimentacion = ? WHERE id = ?",
-                (evaluacion.estado.value, evaluacion.puntaje_final,
-                 fecha.isoformat() if fecha else None, evaluacion.retroalimentacion,
-                 evaluacion.id),
-            )
             conexion.execute(
                 "DELETE FROM calificacion_criterio WHERE evaluacion_id = ?", (evaluacion.id,))
             conexion.executemany(
@@ -297,6 +294,13 @@ class SqliteEvaluacionRepositorio:
                 "VALUES (?, ?, ?)",
                 [(evaluacion.id, criterio_id, nota)
                  for criterio_id, nota in evaluacion.notas.items()],
+            )
+            conexion.execute(
+                "UPDATE evaluacion SET estado = ?, puntaje_final = ?, fecha_confirmacion = ?, "
+                "retroalimentacion = ? WHERE id = ?",
+                (evaluacion.estado.value, evaluacion.puntaje_final,
+                 fecha.isoformat() if fecha else None, evaluacion.retroalimentacion,
+                 evaluacion.id),
             )
         return evaluacion
 
