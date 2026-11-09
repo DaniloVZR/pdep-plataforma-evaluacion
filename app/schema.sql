@@ -180,3 +180,36 @@ CREATE TABLE calificacion_criterio (
     nota            REAL NOT NULL,
     PRIMARY KEY (evaluacion_id, criterio_id)
 );
+
+-- HU-008 · REQ-16 · RN006: el puntaje calculado no se puede modificar manualmente.
+-- La aplicación ya responde 409 si se intenta recalificar una evaluación CONFIRMADA; estos
+-- triggers son la segunda barrera: la base rechaza el cambio aunque se haga con SQL directo.
+-- Se bloquean UPDATE y DELETE; el INSERT de notas se permite porque los datos de ejemplo
+-- cargan primero la evaluación confirmada y después sus notas.
+CREATE TRIGGER evaluacion_confirmada_no_cambia
+BEFORE UPDATE ON evaluacion
+WHEN OLD.estado = 'CONFIRMADA'
+BEGIN
+    SELECT RAISE(ABORT, 'evaluacion_confirmada: el puntaje calculado no se puede modificar');
+END;
+
+CREATE TRIGGER evaluacion_confirmada_no_se_borra
+BEFORE DELETE ON evaluacion
+WHEN OLD.estado = 'CONFIRMADA'
+BEGIN
+    SELECT RAISE(ABORT, 'evaluacion_confirmada: el puntaje calculado no se puede modificar');
+END;
+
+CREATE TRIGGER nota_confirmada_no_cambia
+BEFORE UPDATE ON calificacion_criterio
+WHEN (SELECT estado FROM evaluacion WHERE id = OLD.evaluacion_id) = 'CONFIRMADA'
+BEGIN
+    SELECT RAISE(ABORT, 'evaluacion_confirmada: las notas confirmadas no se pueden modificar');
+END;
+
+CREATE TRIGGER nota_confirmada_no_se_borra
+BEFORE DELETE ON calificacion_criterio
+WHEN (SELECT estado FROM evaluacion WHERE id = OLD.evaluacion_id) = 'CONFIRMADA'
+BEGIN
+    SELECT RAISE(ABORT, 'evaluacion_confirmada: las notas confirmadas no se pueden modificar');
+END;

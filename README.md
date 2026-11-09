@@ -25,6 +25,7 @@ También se agregan (cada historia completa: backend, pruebas y pantalla):
 |---|---|---|---|---|
 | HU-002 Registrar asignaturas y asociarlas a un programa | PDEP-6 | `POST /api/asignaturas`, `GET /api/asignaturas?programa_id=` | `RegistroAsignaturaServicio.registrar` | `/estructura/asignaturas` (administrador) |
 | HU-009 Consultar calificación y retroalimentación | PDEP-13 | `GET /api/resultados?estudiante_id=` | `ConsultaResultadosServicio.consultar` | `/resultados` (estudiante) |
+| HU-008 Cálculo automático del puntaje final | PDEP-12 | `PUT /api/proyectos/<id>/evaluacion` rechaza `puntaje_final`/`puntaje` (400) y triggers en `schema.sql` | `Rubrica.calcular_puntaje`, `rechazar_puntaje_manual` | `/evaluaciones/<id>` (solo lectura tras confirmar) |
 | HU-010 Consolidar y generar reportes de resultados | PDEP-14 | `GET /api/reportes?agrupar_por=&feria_id=&asignatura_id=&programa_id=`, `GET /api/reportes/excel` (mismos parámetros) | `ReporteServicio.generar`, `generar_excel` | `/reportes` (administrador) |
 
 Autores: Angelo Alexander Arango Graciano y Joimar Danilo Urrego David.
@@ -204,6 +205,11 @@ GitHub Actions ejecuta las pruebas, la cobertura y Pylint en cada `push` a `main
   escala por defecto de 1.0 a 5.0; puntaje = Σ (nota × peso), redondeado a 2 decimales.
 - **Confirmación (RN007):** el puntaje solo se publica al confirmar; una evaluación
   confirmada no se puede modificar.
+- **Puntaje no modificable (HU-008, REQ-16):** el evaluador envía notas, nunca el
+  puntaje; si la solicitud trae `puntaje_final` o `puntaje`, la API responde 400
+  (`puntaje_no_editable`). Como segunda barrera, cuatro triggers de `schema.sql` impiden
+  cambiar o borrar una evaluación CONFIRMADA y sus notas, aunque sea con SQL directo.
+  Por eso `guardar_calificacion` reemplaza las notas antes de cambiar el estado.
 - **Estructura académica (HU-001):** la institución exige nombre y NIT; la facultad
   y el departamento exigen nombre y no se repiten dentro de la institución (sin
   distinguir mayúsculas). El programa debe ir en una facultad o un departamento de
