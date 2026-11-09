@@ -25,6 +25,12 @@ class DatoInvalidoError(ErrorDominio):
     estado_http = 400
 
 
+class PuntajeNoEditableError(DatoInvalidoError):
+    """La solicitud trae un puntaje: lo calcula siempre el sistema (HU-008, RN006)."""
+
+    codigo = "puntaje_no_editable"
+
+
 class RecursoNoEncontradoError(ErrorDominio):
     """Base de los errores por identificadores que no existen en la base de datos."""
 

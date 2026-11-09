@@ -4,6 +4,7 @@ from app.dominio.errores import (
     DatoInvalidoError,
     NotasIncompletasError,
     PesosInvalidosError,
+    PuntajeNoEditableError,
     RubricaSinCriteriosError,
 )
 from app.dominio.modelos import Rubrica
@@ -33,6 +34,21 @@ def validar_solicitud_calificacion(datos: object) -> tuple[int, dict[int, object
     except ValueError as error:
         raise DatoInvalidoError("Las claves de 'notas' deben ser ids de criterio.") from error
     return evaluador_id, notas_por_criterio, confirmar
+
+
+CAMPOS_DE_PUNTAJE = ("puntaje_final", "puntaje")
+
+
+def rechazar_puntaje_manual(datos: dict) -> None:
+    """HU-008 · REQ-16: el evaluador envía notas, nunca el puntaje.
+
+    Si la solicitud trae ``puntaje_final`` o ``puntaje``, se rechaza con 400 en vez de
+    ignorarlo en silencio, para que quede claro que el resultado no se escribe a mano.
+    """
+    if any(campo in datos for campo in CAMPOS_DE_PUNTAJE):
+        raise PuntajeNoEditableError(
+            "El puntaje final lo calcula el sistema con las notas y los pesos de la "
+            "rúbrica; no se puede enviar a mano.")
 
 
 def leer_retroalimentacion(datos: dict) -> str:

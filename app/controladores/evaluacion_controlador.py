@@ -11,6 +11,7 @@ from app.servicios.calificacion_servicio import CalificacionServicio
 from app.servicios.reloj import RelojSistema
 from app.dominio.modelos import RolCuenta
 from app.seguridad import exigir_mismo_usuario, requiere_rol
+from app.validadores.calificacion_validador import rechazar_puntaje_manual
 
 evaluaciones_bp = Blueprint("evaluaciones", __name__, url_prefix="/api/proyectos")
 
@@ -28,10 +29,14 @@ def construir_servicio() -> CalificacionServicio:
 @evaluaciones_bp.put("/<int:proyecto_id>/evaluacion")
 @requiere_rol(RolCuenta.EVALUADOR)
 def calificar_proyecto(proyecto_id: int):
-    """Califica el proyecto. El puntaje solo se devuelve si la evaluación quedó confirmada."""
+    """Califica el proyecto. El puntaje solo se devuelve si la evaluación quedó confirmada.
+
+    HU-008: el puntaje no se acepta en la solicitud; siempre lo calcula el servicio.
+    """
     datos = request.get_json(silent=True)
     if isinstance(datos, dict):
         exigir_mismo_usuario(datos.get("evaluador_id"))    # nadie califica por otro
+        rechazar_puntaje_manual(datos)                     # HU-008: nadie escribe el puntaje
     evaluacion = construir_servicio().calificar(proyecto_id, datos)
     fecha = evaluacion.fecha_confirmacion
     return jsonify({
