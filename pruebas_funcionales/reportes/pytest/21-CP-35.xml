@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.573" timestamp="2026-11-13T17:32:10.390816-05:00" hostname="vm"><testcase classname="pruebas_funcionales.playwright.test_hu007" name="test_cp35_nota_vacia_marca_el_criterio[chromium]" time="1.555" /></testsuite></testsuites>

@@ -1,0 +1,3507 @@
+{
+  "collection": {
+    "_": {
+      "postman_id": "821371f6-69d3-5d5d-bb98-43b78cc8b3fa"
+    },
+    "item": [
+      {
+        "id": "817adef5-8078-4348-bb14-a6bf2b54a5a5",
+        "name": "Preparación",
+        "description": {
+          "content": "Crea las 6 ferias por fechas de la sección 4 con fechas calculadas desde hoy.",
+          "type": "text/plain"
+        },
+        "item": [
+          {
+            "id": "28ea70d4-3abe-4782-916d-3fce7c3f282f",
+            "name": "Login administrador (Preparación)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"admin@pascualbravo.edu.co\",\n  \"clave\": \"admin123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "c0679e58-c2c1-4ab2-abd4-e030a53d9ff7",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login administrador responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token_admin\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "20498b1e-5c02-486b-9cbd-600143dea0ce",
+            "name": "Crear Feria abierta",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"institucion_id\": 1,\n  \"nombre\": \"Feria abierta\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_fin\": \"{{fecha_fin}}\",\n  \"asignatura_ids\": [1, 2],\n  \"criterios\": [\n    {\"nombre\": \"Funcionalidad\", \"peso\": 0.5},\n    {\"nombre\": \"Calidad del código\", \"peso\": 0.3},\n    {\"nombre\": \"Presentación\", \"peso\": 0.2}\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "692952ab-422a-494a-8e2d-bb6ccea1711d",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.variables.set(\"fecha_inicio\", fechaBogota(-1));",
+                    "pm.variables.set(\"fecha_fin\", fechaBogota(10));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "2ec59404-74ff-48b3-a610-27d8569e848d",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Se crea Feria abierta\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.environment.set(\"feria_abierta_id\", pm.response.json().id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "24034dab-68f2-4aec-9454-6533188af543",
+            "name": "Crear Feria segunda",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"institucion_id\": 1,\n  \"nombre\": \"Feria segunda\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_fin\": \"{{fecha_fin}}\",\n  \"asignatura_ids\": [1, 2],\n  \"criterios\": [\n    {\"nombre\": \"Funcionalidad\", \"peso\": 0.5},\n    {\"nombre\": \"Calidad del código\", \"peso\": 0.3},\n    {\"nombre\": \"Presentación\", \"peso\": 0.2}\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "bbcf7e8e-7439-4a23-ad9e-d52b83f23f1a",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.variables.set(\"fecha_inicio\", fechaBogota(-5));",
+                    "pm.variables.set(\"fecha_fin\", fechaBogota(5));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "dba4db01-47de-486f-9a11-86acb410a6e0",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Se crea Feria segunda\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.environment.set(\"feria_segunda_id\", pm.response.json().id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "c09ce0cb-7adc-4cd7-a3db-2dfe3148ab2e",
+            "name": "Crear Feria futura",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"institucion_id\": 1,\n  \"nombre\": \"Feria futura\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_fin\": \"{{fecha_fin}}\",\n  \"asignatura_ids\": [1, 2],\n  \"criterios\": [\n    {\"nombre\": \"Funcionalidad\", \"peso\": 0.5},\n    {\"nombre\": \"Calidad del código\", \"peso\": 0.3},\n    {\"nombre\": \"Presentación\", \"peso\": 0.2}\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "349662fd-71ae-4a1b-92b0-95f85ea81b2a",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.variables.set(\"fecha_inicio\", fechaBogota(1));",
+                    "pm.variables.set(\"fecha_fin\", fechaBogota(10));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "f58e9fd2-8d23-4140-b2b0-7670915dede4",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Se crea Feria futura\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.environment.set(\"feria_futura_id\", pm.response.json().id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "93902694-5110-4907-bab0-6dd9bdda77ac",
+            "name": "Crear Feria inicia hoy",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"institucion_id\": 1,\n  \"nombre\": \"Feria inicia hoy\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_fin\": \"{{fecha_fin}}\",\n  \"asignatura_ids\": [1, 2],\n  \"criterios\": [\n    {\"nombre\": \"Funcionalidad\", \"peso\": 0.5},\n    {\"nombre\": \"Calidad del código\", \"peso\": 0.3},\n    {\"nombre\": \"Presentación\", \"peso\": 0.2}\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "0279f930-5d5f-462b-ae85-da4735727c01",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.variables.set(\"fecha_inicio\", fechaBogota(0));",
+                    "pm.variables.set(\"fecha_fin\", fechaBogota(10));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "b9708b77-fec0-42c8-8c2e-2f7c42c19036",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Se crea Feria inicia hoy\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.environment.set(\"feria_inicia_hoy_id\", pm.response.json().id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "495a9f36-941b-40dc-9aac-c9abcb1a23f2",
+            "name": "Crear Feria termina hoy",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"institucion_id\": 1,\n  \"nombre\": \"Feria termina hoy\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_fin\": \"{{fecha_fin}}\",\n  \"asignatura_ids\": [1, 2],\n  \"criterios\": [\n    {\"nombre\": \"Funcionalidad\", \"peso\": 0.5},\n    {\"nombre\": \"Calidad del código\", \"peso\": 0.3},\n    {\"nombre\": \"Presentación\", \"peso\": 0.2}\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "93fe24d0-9607-47a4-a4cf-2fd978a185c9",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.variables.set(\"fecha_inicio\", fechaBogota(-10));",
+                    "pm.variables.set(\"fecha_fin\", fechaBogota(0));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "1d0df562-1b9e-425d-b49c-e0d99e56f3f0",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Se crea Feria termina hoy\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.environment.set(\"feria_termina_hoy_id\", pm.response.json().id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "37d41931-95be-4a55-8404-3b302d8dacf1",
+            "name": "Crear Feria vencida",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"institucion_id\": 1,\n  \"nombre\": \"Feria vencida\",\n  \"fecha_inicio\": \"{{fecha_inicio}}\",\n  \"fecha_fin\": \"{{fecha_fin}}\",\n  \"asignatura_ids\": [1, 2],\n  \"criterios\": [\n    {\"nombre\": \"Funcionalidad\", \"peso\": 0.5},\n    {\"nombre\": \"Calidad del código\", \"peso\": 0.3},\n    {\"nombre\": \"Presentación\", \"peso\": 0.2}\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "4e900a9d-5f00-466a-9b48-d995c1bba8ca",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.variables.set(\"fecha_inicio\", fechaBogota(-10));",
+                    "pm.variables.set(\"fecha_fin\", fechaBogota(-1));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "b683abc2-cbab-4eec-8130-82561fde2a8e",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Se crea Feria vencida\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.environment.set(\"feria_vencida_id\", pm.response.json().id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "0b5d2aad-b41a-4a95-80fd-e6841efe1f02",
+            "name": "Criterios de Feria termina hoy",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "ferias",
+                  "{{feria_termina_hoy_id}}",
+                  "rubrica"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "GET"
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "6181f679-fadc-403e-8ca8-f81aa4a93163",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"La rúbrica tiene los tres criterios\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const ids = pm.response.json().criterios.map(c => c.id);",
+                    "    pm.expect(ids.length).to.eql(3);",
+                    "    pm.environment.set(\"criterios_termina_hoy\", JSON.stringify(ids));",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      },
+      {
+        "id": "db3bbe46-3593-44f3-ac32-36a79e8de43b",
+        "name": "Preparación HU-007 - asignaciones",
+        "description": {
+          "content": "HU-006: asigna a Docente Evaluador a Huerta inteligente y Reciclaje escolar. Va después de CP-31 y antes de CP-46.",
+          "type": "text/plain"
+        },
+        "item": [
+          {
+            "id": "a3345479-4da5-44c3-a220-e3dbf2e0909a",
+            "name": "Login administrador (asignaciones)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"admin@pascualbravo.edu.co\",\n  \"clave\": \"admin123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "98955bbe-0ac5-4bee-a2a6-abe1d460cd1a",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login administrador responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token_admin\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "4536888e-0d35-4c6a-bd6c-04738e06bb71",
+            "name": "Buscar Huerta inteligente",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [
+                  {
+                    "key": "feria_id",
+                    "value": "{{feria_abierta_id}}"
+                  }
+                ],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "GET"
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "d01da847-0dec-4417-a151-bb1b46e5dcb5",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Huerta inteligente está inscrito\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const proyecto = pm.response.json().find(p => p.nombre === \"Huerta inteligente\");",
+                    "    pm.expect(proyecto, \"Huerta inteligente\").to.be.an(\"object\");",
+                    "    pm.environment.set(\"huerta_id\", proyecto.id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "6fe0605c-1a84-425b-9e70-24341e8f3c74",
+            "name": "Asignar Docente Evaluador a Huerta inteligente",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "{{huerta_id}}",
+                  "evaluadores"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "e162610e-d987-4d39-9623-b7037aaf0572",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Queda asignado a Huerta inteligente\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "0f9cb8d7-f71e-4b6a-bd08-790a8ebb42ef",
+            "name": "Buscar Reciclaje escolar",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [
+                  {
+                    "key": "feria_id",
+                    "value": "{{feria_inicia_hoy_id}}"
+                  }
+                ],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "GET"
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "5f3ae9e6-d0f3-469d-a9c3-7ea102d3b774",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Reciclaje escolar está inscrito\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const proyecto = pm.response.json().find(p => p.nombre === \"Reciclaje escolar\");",
+                    "    pm.expect(proyecto, \"Reciclaje escolar\").to.be.an(\"object\");",
+                    "    pm.environment.set(\"reciclaje_id\", proyecto.id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "f90a6047-857a-445c-b9d8-1684e5b8c05a",
+            "name": "Asignar Docente Evaluador a Reciclaje escolar",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "{{reciclaje_id}}",
+                  "evaluadores"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_admin}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "f091855f-0279-49d0-b170-a9cca9e8cc0b",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Queda asignado a Reciclaje escolar\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      },
+      {
+        "id": "248d5042-6d92-45ea-9fec-016beb785f1f",
+        "name": "HU-003 - Registro de usuarios",
+        "item": [
+          {
+            "id": "44490f98-01bb-449d-83b3-1881bfc19aa1",
+            "name": "Login administrador (HU-003)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"admin@pascualbravo.edu.co\",\n  \"clave\": \"admin123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "648f387d-3a87-42e4-acb9-0554fc8c25e1",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login administrador responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "5c8dcf9e-cb15-45ff-86cb-745d5becd044",
+            "name": "CP-03",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Carlos Ruiz\",\n  \"correo\": \" Carlos.Ruiz@PascualBravo.EDU.CO \",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "96b24128-19fe-45c4-937d-1138ac2e7fc1",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-03 guarda el correo en minúsculas y sin espacios\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    pm.expect(pm.response.json().correo).to.eql(\"carlos.ruiz@pascualbravo.edu.co\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "5723f4fe-69f1-4537-b1c3-67b2c537bbc1",
+            "name": "CP-09",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Ana Pérez\",\n  \"correo\": \"ana.perez@gmail.com\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "666b115b-2589-4081-acbf-f4fd39a29466",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-09 rechaza el correo no institucional\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"correo_no_institucional\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"El correo no pertenece a una institución registrada.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "e1538827-eb6b-4d32-8d30-5499d273af44",
+            "name": "CP-10",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Ana Pérez\",\n  \"correo\": \"ana@pascualbravo.edu.co.falso.com\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "dc3a8dd5-4355-4160-a449-c6b1b5b7b3b5",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-10 rechaza un dominio que no termina en el institucional\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"correo_no_institucional\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"El correo no pertenece a una institución registrada.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "156f2f93-3daf-45ff-8803-907e6b2d032e",
+            "name": "CP-12",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Ana Pérez\",\n  \"correo\": \"ANA.PEREZ@pascualbravo.edu.co\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "002c86b7-2617-4dc2-8f63-28171238b449",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-12 rechaza el correo repetido en mayúsculas\", function () {",
+                    "    pm.response.to.have.status(409);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"correo_duplicado\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Ya existe un usuario con ese correo.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "4365beea-89c8-49bb-9c16-36f7c0b58de4",
+            "name": "CP-13",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Sofía Mesa\",\n  \"correo\": \"sofia.mesa@pascualbravo.edu.co\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 999,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "4e3fefc4-2fed-4188-94f8-674c4cd4d131",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-13 rechaza un programa que no existe\", function () {",
+                    "    pm.response.to.have.status(404);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"programa_no_encontrado\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"El programa indicado no existe.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "80ba6452-259e-43a8-b4fb-de0c01fc0c58",
+            "name": "CP-14",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Sofía Mesa\",\n  \"correo\": \"sofia.mesa@pascualbravo.edu.co\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    999\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "15d5ebeb-a907-41e2-ac66-ce87faa21c57",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-14 rechaza una asignatura que no existe\", function () {",
+                    "    pm.response.to.have.status(404);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"asignatura_no_encontrada\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"No existen las asignaturas [999].\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "a9a8eeb5-f1b2-4072-a00e-c36e6fa7a4ca",
+            "name": "Login estudiante (HU-003)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"estudiante@pascualbravo.edu.co\",\n  \"clave\": \"estudiante123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "2ceb1752-68a8-4c24-bd4e-e61ac6a798a9",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login estudiante responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token_estudiante\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "598d7d98-ffb1-4d77-a2c7-c700620425c0",
+            "name": "CP-16",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_estudiante}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Pedro Ríos\",\n  \"correo\": \"pedro.rios@pascualbravo.edu.co\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "0f837423-157c-43af-b4aa-7bf4a4ecfefd",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-16 un estudiante no puede registrar usuarios\", function () {",
+                    "    pm.response.to.have.status(403);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"sin_permiso\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Tu rol no tiene permiso para hacer esta acción.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      },
+      {
+        "id": "138f5215-226e-48f1-b717-c15fffd82814",
+        "name": "HU-005 - Inscripción de proyectos",
+        "item": [
+          {
+            "id": "8594da87-b79b-47c7-ac79-273e02e015de",
+            "name": "Login estudiante (HU-005)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"estudiante@pascualbravo.edu.co\",\n  \"clave\": \"estudiante123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "769e32e8-2aaf-4af2-b732-d4ade33efd0e",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login estudiante responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "2adf4a51-22ef-44f5-8baf-f501fac98329",
+            "name": "CP-19",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": {{feria_segunda_id}},\n  \"nombre\": \"Huerta inteligente\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "c278d35b-3124-4255-80af-94d709053cff",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.test(\"CP-19 se inscribe con la fecha de hoy\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.fecha_inscripcion).to.eql(fechaBogota(0));",
+                    "    ",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "f7773dd1-be66-4ba9-be4e-c83223d94ec5",
+            "name": "CP-23",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": {{feria_abierta_id}},\n  \"nombre\": \"Reciclaje escolar\",\n  \"modalidad\": \"PX\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "b1ed1667-0590-43d9-9dc5-651b627a8da8",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-23 rechaza la modalidad PX\", function () {",
+                    "    pm.response.to.have.status(400);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"dato_invalido\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La modalidad debe ser PA o PIA.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "9e7f8296-a768-46a4-ad5c-6b24ae1b11ad",
+            "name": "CP-24",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": 999,\n  \"nombre\": \"Reciclaje escolar\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "d43bdc77-95fb-4639-a8cd-76814e98d11c",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-24 rechaza una feria que no existe\", function () {",
+                    "    pm.response.to.have.status(404);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"feria_no_encontrada\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La feria indicada no existe.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "a5d2f137-463b-48a7-a867-41edf0a3e490",
+            "name": "CP-25",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 999,\n  \"feria_id\": {{feria_abierta_id}},\n  \"nombre\": \"Reciclaje escolar\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "0ef59ada-3c13-4eba-8263-dd6e03ec715b",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-25 rechaza un equipo que no existe\", function () {",
+                    "    pm.response.to.have.status(404);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"equipo_no_encontrado\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"El equipo indicado no existe.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "8cb167ad-77ef-4c8e-a873-76d3261ba3a8",
+            "name": "CP-26",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": 1,\n  \"nombre\": \"Reciclaje escolar\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [3]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "71abf0da-4465-40c0-adcc-dd953eea64dd",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-26 rechaza una asignatura que no participa en la feria\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"asignatura_no_participante\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Alguna asignatura no participa en la feria.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "4056ef97-6eb5-424b-96d8-4ad6ac14b8d2",
+            "name": "CP-29",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": {{feria_termina_hoy_id}},\n  \"nombre\": \"Biblioteca digital\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "30d470eb-4310-4f7e-9e85-8e4b8019e6f0",
+                  "type": "text/javascript",
+                  "exec": [
+                    "function fechaBogota(dias) {",
+                    "    const d = new Date(Date.now() - 5 * 3600 * 1000 + dias * 86400 * 1000);",
+                    "    return d.toISOString().slice(0, 10);",
+                    "}",
+                    "pm.test(\"CP-29 se inscribe con la fecha de hoy\", function () {",
+                    "    pm.response.to.have.status(201);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.fecha_inscripcion).to.eql(fechaBogota(0));",
+                    "    pm.environment.set(\"biblioteca_id\", cuerpo.id);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "9ec47297-543d-4a3e-8acf-5f56f420cfc1",
+            "name": "CP-32",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": {{feria_abierta_id}},\n  \"nombre\": \" HUERTA Inteligente \",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "98e0e3b6-bee9-4783-9f7f-a208885e6cab",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-32 rechaza el nombre repetido con mayúsculas y espacios\", function () {",
+                    "    pm.response.to.have.status(409);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"proyecto_duplicado\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"El equipo ya inscribió un proyecto con ese nombre en la feria.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "396d2b48-7f8e-4291-a426-6df58eaa032e",
+            "name": "Login evaluador (HU-005)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"evaluador@pascualbravo.edu.co\",\n  \"clave\": \"evaluador123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "34b2f3dd-c69b-49c8-a336-b20275b183ec",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login evaluador responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token_evaluador\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "ca096078-6ba2-42c8-9e8f-ef09b8f04a96",
+            "name": "CP-34",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_evaluador}}"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": {{feria_abierta_id}},\n  \"nombre\": \"Reciclaje escolar\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "f0951565-21cc-4882-b524-98ab3f913995",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-34 un evaluador no puede inscribir proyectos\", function () {",
+                    "    pm.response.to.have.status(403);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"sin_permiso\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Tu rol no tiene permiso para hacer esta acción.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      },
+      {
+        "id": "9450f8f1-831e-44ed-98b9-1ec4fbce34d9",
+        "name": "HU-007 - Calificación con rúbrica",
+        "item": [
+          {
+            "id": "b5a30fbd-5aa6-49e4-8deb-feadae6c0b21",
+            "name": "Login evaluador (HU-007)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"evaluador@pascualbravo.edu.co\",\n  \"clave\": \"evaluador123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "dcb3060e-7d71-4a83-b99f-78768717ea81",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login evaluador responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token\", cuerpo.token);",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "44f30774-7ffc-421e-904c-b5a82de1deba",
+            "name": "CP-36",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4, \"2\": 3},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "d5777487-d474-41af-a23c-b98ce77d6426",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-36 rechaza la calificación sin todas las notas\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"notas_incompletas\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Debe enviar exactamente una nota por cada criterio.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "b1dfa698-5a6c-45cb-99ad-7e9b0c269839",
+            "name": "CP-37",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": \"cuatro\", \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "6003bdcb-150f-4603-890c-9909d0fafcf2",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-37 rechaza una nota escrita con letras\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"tipo_nota_invalido\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La nota 'cuatro' no es un número válido.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "9f69df6d-ffa8-4a14-b919-1fbb42e8d22b",
+            "name": "CP-39",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 5.01, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "a4547916-8b43-45e0-a33d-ea71e4cf88ac",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-39 rechaza la nota 5.01\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"nota_fuera_de_rango\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La nota 5.01 está fuera de la escala 1.0–5.0.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "6058e85f-e6fe-469a-ab7e-69ec16add4d1",
+            "name": "CP-40",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 0.99, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "3d0934c3-f121-4f7b-b2e3-1f92a1c954c8",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-40 rechaza la nota 0.99\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"nota_fuera_de_rango\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La nota 0.99 está fuera de la escala 1.0–5.0.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "8e40b290-df30-427f-951f-f3c0eb1e871b",
+            "name": "CP-45",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 2, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "91a5f9f8-03c3-4e08-baf5-5ade480f9fc1",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-45 no deja cambiar una evaluación confirmada\", function () {",
+                    "    pm.response.to.have.status(409);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"evaluacion_confirmada\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La evaluación ya fue confirmada.\");",
+                    "});",
+                    "",
+                    "pm.test(\"CP-45 el puntaje sigue en 3.9\", function (hecho) {",
+                    "    pm.sendRequest({",
+                    "        url: pm.environment.get(\"base_url\") + \"/api/evaluaciones?evaluador_id=1\",",
+                    "        header: { Authorization: \"Bearer \" + pm.environment.get(\"token\") }",
+                    "    }, function (falla, respuesta) {",
+                    "        const ev = respuesta.json().find(e => e.proyecto_id === 1);",
+                    "        pm.expect(ev.estado).to.eql(\"CONFIRMADA\");",
+                    "        pm.expect(ev.puntaje_final).to.eql(3.9);",
+                    "        hecho();",
+                    "    });",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "440e25c6-d88a-4c0d-83fc-861430a66182",
+            "name": "CP-49",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "{{biblioteca_id}}",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {{notas_biblioteca}},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "88f4ba62-74d4-441f-bc0e-848a97e3af59",
+                  "type": "text/javascript",
+                  "exec": [
+                    "const ids = JSON.parse(pm.environment.get(\"criterios_termina_hoy\"));",
+                    "const notas = {};",
+                    "ids.forEach(id => { notas[String(id)] = 4.0; });",
+                    "pm.variables.set(\"notas_biblioteca\", JSON.stringify(notas));"
+                  ]
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "id": "370b0018-cb89-4a4e-a0ec-2aee72e34174",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-49 el evaluador no califica un proyecto que no tiene asignado\", function () {",
+                    "    pm.response.to.have.status(403);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"evaluador_no_asignado\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"El evaluador no tiene asignado este proyecto.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "f5303a07-71ce-4b1b-bffb-63f60a31ecee",
+            "name": "CP-51",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "90",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "c4633093-8c2d-4843-bd1b-479c9bc7810e",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-51 no se califica sin rúbrica\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"rubrica_no_encontrada\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La feria no tiene una rúbrica asociada.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "c96bc928-6869-4961-969f-e6620591d344",
+            "name": "CP-52",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "91",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"910\": 4, \"911\": 3},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "e64cf387-7cb1-469f-b07e-e7ab34ff631a",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-52 no se califica si los pesos no suman 100 %\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"pesos_invalidos\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Los pesos de la rúbrica deben ser positivos y sumar 100 %.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "de50c3ff-dc9c-460c-932d-b69fe5a16ef9",
+            "name": "CP-53",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "92",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "1bcb10c0-b57c-44ed-b5da-60b335a9e790",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-53 no se califica con una rúbrica sin criterios\", function () {",
+                    "    pm.response.to.have.status(422);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"rubrica_sin_criterios\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"La rúbrica de la feria no tiene criterios.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "7b5d81b9-3935-4f5d-90c6-89ac6c2e4f46",
+            "name": "Login estudiante (HU-007)",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "login"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"correo\": \"estudiante@pascualbravo.edu.co\",\n  \"clave\": \"estudiante123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "8fa10433-8634-4ba5-a77a-f62dbf4af23b",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"Login estudiante responde 200 con token\", function () {",
+                    "    pm.response.to.have.status(200);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                    "    pm.environment.set(\"token_estudiante\", cuerpo.token);",
+                    "});"
+                  ],
+                  "_lastExecutionId": "91b147a6-e880-44ba-9a93-78378958501a"
+                }
+              }
+            ]
+          },
+          {
+            "id": "a5909956-92f1-431a-ac31-8b931505a1c7",
+            "name": "CP-55",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token_estudiante}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "56f46cf6-302e-4361-8d2b-89c4355aa2a1",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-55 un estudiante no puede calificar\", function () {",
+                    "    pm.response.to.have.status(403);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"sin_permiso\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Tu rol no tiene permiso para hacer esta acción.\");",
+                    "});"
+                  ],
+                  "_lastExecutionId": "c29fd7ac-7f21-4a40-a222-5446c3dafda3"
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      },
+      {
+        "id": "9e468fa8-dd83-4b1f-9a48-9a6da8af9af1",
+        "name": "Sin sesión",
+        "item": [
+          {
+            "id": "2910b5a6-a3dd-48a6-b2d5-813a039dbfdd",
+            "name": "CP-59",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "usuarios"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"nombres\": \"Pedro Ríos\",\n  \"correo\": \"pedro.rios@pascualbravo.edu.co\",\n  \"rol\": \"ESTUDIANTE\",\n  \"programa_id\": 1,\n  \"asignatura_ids\": [\n    1\n  ]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "9db84be7-f2c7-426b-86f9-aed4ed108dd2",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-59 sin sesión no se registran usuarios\", function () {",
+                    "    pm.response.to.have.status(401);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"sesion_requerida\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Debes iniciar sesión para usar esta función.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "45f9710e-7d0d-474b-9c05-6105dd5e2ab7",
+            "name": "CP-60",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"equipo_id\": 1,\n  \"feria_id\": {{feria_abierta_id}},\n  \"nombre\": \"Reciclaje escolar\",\n  \"modalidad\": \"PA\",\n  \"asignatura_ids\": [1]\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "d7600e76-d21e-41fc-a212-17e1637c2424",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-60 sin sesión no se inscriben proyectos\", function () {",
+                    "    pm.response.to.have.status(401);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"sesion_requerida\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Debes iniciar sesión para usar esta función.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "54dbd08b-4929-484d-b365-1906c1d68de2",
+            "name": "CP-61",
+            "request": {
+              "url": {
+                "path": [
+                  "api",
+                  "proyectos",
+                  "1",
+                  "evaluacion"
+                ],
+                "host": [
+                  "{{base_url}}"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "85697c0b-2c72-4c22-a82f-5122e066df0b",
+                  "type": "text/javascript",
+                  "exec": [
+                    "pm.test(\"CP-61 sin sesión no se califica\", function () {",
+                    "    pm.response.to.have.status(401);",
+                    "    const cuerpo = pm.response.json();",
+                    "    pm.expect(cuerpo.codigo).to.eql(\"sesion_requerida\");",
+                    "    pm.expect(cuerpo.mensaje).to.eql(\"Debes iniciar sesión para usar esta función.\");",
+                    "});"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      }
+    ],
+    "event": [],
+    "variable": [],
+    "info": {
+      "_postman_id": "821371f6-69d3-5d5d-bb98-43b78cc8b3fa",
+      "name": "PDEP - Pruebas funcionales",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "description": {
+        "content": "Casos de API del RTF4 v2 (pruebas funcionales de HU-003, HU-005 y HU-007). Cada petición lleva el nombre de su CP. Se corren en el orden del RTF4 sobre una base nueva (init-db --demo + pruebas_funcionales/datos_prueba.sql).",
+        "type": "text/plain"
+      }
+    }
+  },
+  "environment": {
+    "_": {
+      "postman_variable_scope": "environment",
+      "postman_exported_at": "2026-11-13T22:32:27.352Z",
+      "postman_exported_using": "Newman/6.2.3"
+    },
+    "id": "156fc13d-9e26-5fea-a6a9-db5a4af6e6a0",
+    "name": "PDEP local",
+    "values": [
+      {
+        "type": "any",
+        "value": "http://127.0.0.1:5000",
+        "key": "base_url"
+      },
+      {
+        "type": "any",
+        "value": "eyJyb2wiOiJBRE1JTklTVFJBRE9SIiwidXN1YXJpb19pZCI6bnVsbH0.aveP5w.43PigFIUQ8ZdnViFH5_1H_Xg-I4",
+        "key": "token_admin"
+      },
+      {
+        "type": "any",
+        "value": 93,
+        "key": "feria_abierta_id"
+      },
+      {
+        "type": "any",
+        "value": 94,
+        "key": "feria_segunda_id"
+      },
+      {
+        "type": "any",
+        "value": 95,
+        "key": "feria_futura_id"
+      },
+      {
+        "type": "any",
+        "value": 96,
+        "key": "feria_inicia_hoy_id"
+      },
+      {
+        "type": "any",
+        "value": 97,
+        "key": "feria_termina_hoy_id"
+      },
+      {
+        "type": "any",
+        "value": 98,
+        "key": "feria_vencida_id"
+      },
+      {
+        "type": "any",
+        "value": "[924,925,926]",
+        "key": "criterios_termina_hoy"
+      },
+      {
+        "type": "any",
+        "value": "eyJyb2wiOiJFVkFMVUFET1IiLCJ1c3VhcmlvX2lkIjoxfQ.aveP-w.tWdKsv0WqIHVCF1pYhvh2FCjKsE",
+        "key": "token"
+      },
+      {
+        "type": "any",
+        "value": "eyJyb2wiOiJFU1RVRElBTlRFIiwidXN1YXJpb19pZCI6Mn0.aveP_Q.y3iBYCESuiel9UrnYqdgvcJtL2E",
+        "key": "token_estudiante"
+      },
+      {
+        "type": "any",
+        "value": 96,
+        "key": "biblioteca_id"
+      },
+      {
+        "type": "any",
+        "value": 93,
+        "key": "huerta_id"
+      },
+      {
+        "type": "any",
+        "value": 95,
+        "key": "reciclaje_id"
+      },
+      {
+        "type": "any",
+        "value": "eyJyb2wiOiJFVkFMVUFET1IiLCJ1c3VhcmlvX2lkIjoxfQ.aveP6g.oPIhUe-po3nikIXDpdSWuSdT6V0",
+        "key": "token_evaluador"
+      }
+    ]
+  },
+  "globals": {
+    "id": "121d28c1-3d83-48e1-9031-07024b070feb",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 13,
+      "responseMin": 6,
+      "responseMax": 20,
+      "responseSd": 7,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1794609149651,
+      "completed": 1794609149725
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 2,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "6fa38997-5270-4cea-95b9-aa26a0573d50",
+          "httpRequestId": "72a2fc99-7bab-4cd7-b078-a147aa497642"
+        },
+        "item": {
+          "id": "7b5d81b9-3935-4f5d-90c6-89ac6c2e4f46",
+          "name": "Login estudiante (HU-007)",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "login"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"estudiante@pascualbravo.edu.co\",\n  \"clave\": \"estudiante123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "8fa10433-8634-4ba5-a77a-f62dbf4af23b",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login estudiante responde 200 con token\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.environment.set(\"token_estudiante\", cuerpo.token);",
+                  "});"
+                ],
+                "_lastExecutionId": "91b147a6-e880-44ba-9a93-78378958501a"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "5000",
+            "path": [
+              "api",
+              "login"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "618bebed-e39b-4287-824c-255569645200",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:5000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "76",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"correo\": \"estudiante@pascualbravo.edu.co\",\n  \"clave\": \"estudiante123\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "897d0121-2e3d-491b-902b-8f9af2bf252e",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Server",
+              "value": "Werkzeug/3.1.9 Python/3.13.18"
+            },
+            {
+              "key": "Date",
+              "value": "Fri, 13 Nov 2026 22:32:29 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "156"
+            },
+            {
+              "key": "Connection",
+              "value": "close"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              110,
+              111,
+              109,
+              98,
+              114,
+              101,
+              34,
+              58,
+              34,
+              69,
+              115,
+              116,
+              117,
+              100,
+              105,
+              97,
+              110,
+              116,
+              101,
+              32,
+              68,
+              101,
+              109,
+              111,
+              34,
+              44,
+              34,
+              114,
+              111,
+              108,
+              34,
+              58,
+              34,
+              69,
+              83,
+              84,
+              85,
+              68,
+              73,
+              65,
+              78,
+              84,
+              69,
+              34,
+              44,
+              34,
+              116,
+              111,
+              107,
+              101,
+              110,
+              34,
+              58,
+              34,
+              101,
+              121,
+              74,
+              121,
+              98,
+              50,
+              119,
+              105,
+              79,
+              105,
+              74,
+              70,
+              85,
+              49,
+              82,
+              86,
+              82,
+              69,
+              108,
+              66,
+              84,
+              108,
+              82,
+              70,
+              73,
+              105,
+              119,
+              105,
+              100,
+              88,
+              78,
+              49,
+              89,
+              88,
+              74,
+              112,
+              98,
+              49,
+              57,
+              112,
+              90,
+              67,
+              73,
+              54,
+              77,
+              110,
+              48,
+              46,
+              97,
+              118,
+              101,
+              80,
+              95,
+              81,
+              46,
+              121,
+              51,
+              105,
+              66,
+              89,
+              67,
+              69,
+              83,
+              117,
+              105,
+              101,
+              108,
+              57,
+              85,
+              114,
+              110,
+              89,
+              113,
+              100,
+              103,
+              118,
+              99,
+              74,
+              116,
+              76,
+              50,
+              69,
+              34,
+              44,
+              34,
+              117,
+              115,
+              117,
+              97,
+              114,
+              105,
+              111,
+              95,
+              105,
+              100,
+              34,
+              58,
+              50,
+              125,
+              10
+            ]
+          },
+          "cookie": [],
+          "responseTime": 20,
+          "responseSize": 156
+        },
+        "id": "7b5d81b9-3935-4f5d-90c6-89ac6c2e4f46",
+        "assertions": [
+          {
+            "assertion": "Login estudiante responde 200 con token",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "1b72f045-4043-448e-a793-84bf135be749",
+          "length": 2,
+          "cycles": 1,
+          "position": 1,
+          "iteration": 0,
+          "httpRequestId": "64edaff5-e456-47d5-a0ea-71862576708b"
+        },
+        "item": {
+          "id": "a5909956-92f1-431a-ac31-8b931505a1c7",
+          "name": "CP-55",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "proyectos",
+                "1",
+                "evaluacion"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_estudiante}}"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "56f46cf6-302e-4361-8d2b-89c4355aa2a1",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"CP-55 un estudiante no puede calificar\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.expect(cuerpo.codigo).to.eql(\"sin_permiso\");",
+                  "    pm.expect(cuerpo.mensaje).to.eql(\"Tu rol no tiene permiso para hacer esta acción.\");",
+                  "});"
+                ],
+                "_lastExecutionId": "c29fd7ac-7f21-4a40-a222-5446c3dafda3"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "5000",
+            "path": [
+              "api",
+              "proyectos",
+              "1",
+              "evaluacion"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Authorization",
+              "value": "Bearer eyJyb2wiOiJFU1RVRElBTlRFIiwidXN1YXJpb19pZCI6Mn0.aveP_Q.y3iBYCESuiel9UrnYqdgvcJtL2E"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "f9ca301c-aa49-4c33-95ff-9a5b77b84a43",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:5000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "82",
+              "system": true
+            }
+          ],
+          "method": "PUT",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"evaluador_id\": 1,\n  \"notas\": {\"1\": 4, \"2\": 3, \"3\": 5},\n  \"confirmar\": false\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "ab363e07-223f-4366-9219-80162db9e668",
+          "status": "FORBIDDEN",
+          "code": 403,
+          "header": [
+            {
+              "key": "Server",
+              "value": "Werkzeug/3.1.9 Python/3.13.18"
+            },
+            {
+              "key": "Date",
+              "value": "Fri, 13 Nov 2026 22:32:29 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "90"
+            },
+            {
+              "key": "Connection",
+              "value": "close"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              99,
+              111,
+              100,
+              105,
+              103,
+              111,
+              34,
+              58,
+              34,
+              115,
+              105,
+              110,
+              95,
+              112,
+              101,
+              114,
+              109,
+              105,
+              115,
+              111,
+              34,
+              44,
+              34,
+              109,
+              101,
+              110,
+              115,
+              97,
+              106,
+              101,
+              34,
+              58,
+              34,
+              84,
+              117,
+              32,
+              114,
+              111,
+              108,
+              32,
+              110,
+              111,
+              32,
+              116,
+              105,
+              101,
+              110,
+              101,
+              32,
+              112,
+              101,
+              114,
+              109,
+              105,
+              115,
+              111,
+              32,
+              112,
+              97,
+              114,
+              97,
+              32,
+              104,
+              97,
+              99,
+              101,
+              114,
+              32,
+              101,
+              115,
+              116,
+              97,
+              32,
+              97,
+              99,
+              99,
+              105,
+              92,
+              117,
+              48,
+              48,
+              102,
+              51,
+              110,
+              46,
+              34,
+              125,
+              10
+            ]
+          },
+          "cookie": [],
+          "responseTime": 6,
+          "responseSize": 90
+        },
+        "id": "a5909956-92f1-431a-ac31-8b931505a1c7",
+        "assertions": [
+          {
+            "assertion": "CP-55 un estudiante no puede calificar",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 246
+    },
+    "failures": [],
+    "error": null
+  }
+}

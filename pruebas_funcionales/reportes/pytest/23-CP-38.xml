@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.752" timestamp="2026-11-13T17:32:12.855479-05:00" hostname="vm"><testcase classname="pruebas_funcionales.playwright.test_hu007" name="test_cp38_nota_mayor_a_5_marca_el_criterio[chromium]" time="1.732" /></testsuite></testsuites>
