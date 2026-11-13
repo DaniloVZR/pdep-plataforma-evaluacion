@@ -1,0 +1,547 @@
+{
+  "fecha": "2026-11-13T17:31:37.530095-05:00",
+  "ejecutor": "Joimar Danilo Urrego David",
+  "commit": "9747ece",
+  "casos": {
+    "CP-01": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp01_registra_estudiante_muestra_aviso_verde",
+      "fallas": []
+    },
+    "CP-02": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp02_registra_docente_muestra_aviso_verde",
+      "fallas": []
+    },
+    "CP-03": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-03",
+      "fallas": [],
+      "estado_http": 201,
+      "pruebas": [
+        "CP-03 guarda el correo en minúsculas y sin espacios"
+      ]
+    },
+    "CP-04": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp04_nombres_vacios_marca_el_campo",
+      "fallas": []
+    },
+    "CP-05": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp05_correo_vacio_marca_el_campo",
+      "fallas": []
+    },
+    "CP-06": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp06_correo_sin_arroba_marca_el_campo",
+      "fallas": []
+    },
+    "CP-07": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp07_sin_programa_marca_la_lista",
+      "fallas": []
+    },
+    "CP-08": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp08_correo_personal_muestra_recuadro_rojo",
+      "fallas": []
+    },
+    "CP-09": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-09",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-09 rechaza el correo no institucional"
+      ]
+    },
+    "CP-10": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-10",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-10 rechaza un dominio que no termina en el institucional"
+      ]
+    },
+    "CP-11": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp11_correo_repetido_muestra_recuadro_rojo",
+      "fallas": []
+    },
+    "CP-12": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-12",
+      "fallas": [],
+      "estado_http": 409,
+      "pruebas": [
+        "CP-12 rechaza el correo repetido en mayúsculas"
+      ]
+    },
+    "CP-13": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-13",
+      "fallas": [],
+      "estado_http": 404,
+      "pruebas": [
+        "CP-13 rechaza un programa que no existe"
+      ]
+    },
+    "CP-14": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-14",
+      "fallas": [],
+      "estado_http": 404,
+      "pruebas": [
+        "CP-14 rechaza una asignatura que no existe"
+      ]
+    },
+    "CP-15": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp15_estudiante_no_ve_registrar_usuario",
+      "fallas": []
+    },
+    "CP-16": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-16",
+      "fallas": [],
+      "estado_http": 403,
+      "pruebas": [
+        "CP-16 un estudiante no puede registrar usuarios"
+      ]
+    },
+    "CP-17": {
+      "hu": "HU-003",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp17_evaluador_no_ve_registrar_usuario",
+      "fallas": []
+    },
+    "CP-18": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp18_inscribe_proyecto_en_feria_abierta",
+      "fallas": []
+    },
+    "CP-19": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-19",
+      "fallas": [],
+      "estado_http": 201,
+      "pruebas": [
+        "CP-19 se inscribe con la fecha de hoy"
+      ]
+    },
+    "CP-20": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp20_nombre_vacio_marca_el_campo",
+      "fallas": []
+    },
+    "CP-21": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp21_sin_feria_marca_feria_y_asignaturas",
+      "fallas": []
+    },
+    "CP-22": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp22_pia_con_una_asignatura_no_se_envia",
+      "fallas": []
+    },
+    "CP-23": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-23",
+      "fallas": [],
+      "estado_http": 400,
+      "pruebas": [
+        "CP-23 rechaza la modalidad PX"
+      ]
+    },
+    "CP-24": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-24",
+      "fallas": [],
+      "estado_http": 404,
+      "pruebas": [
+        "CP-24 rechaza una feria que no existe"
+      ]
+    },
+    "CP-25": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-25",
+      "fallas": [],
+      "estado_http": 404,
+      "pruebas": [
+        "CP-25 rechaza un equipo que no existe"
+      ]
+    },
+    "CP-26": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-26",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-26 rechaza una asignatura que no participa en la feria"
+      ]
+    },
+    "CP-27": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp27_feria_futura_aun_no_abre",
+      "fallas": []
+    },
+    "CP-28": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp28_feria_que_inicia_hoy_acepta_la_inscripcion",
+      "fallas": []
+    },
+    "CP-29": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-29",
+      "fallas": [],
+      "estado_http": 201,
+      "pruebas": [
+        "CP-29 se inscribe con la fecha de hoy"
+      ]
+    },
+    "CP-30": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp30_feria_vencida_plazo_vencido",
+      "fallas": []
+    },
+    "CP-31": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp31_proyecto_repetido_en_la_misma_feria",
+      "fallas": []
+    },
+    "CP-32": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-32",
+      "fallas": [],
+      "estado_http": 409,
+      "pruebas": [
+        "CP-32 rechaza el nombre repetido con mayúsculas y espacios"
+      ]
+    },
+    "CP-33": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp33_evaluador_no_ve_inscribir_proyecto",
+      "fallas": []
+    },
+    "CP-34": {
+      "hu": "HU-005",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-34",
+      "fallas": [],
+      "estado_http": 403,
+      "pruebas": [
+        "CP-34 un evaluador no puede inscribir proyectos"
+      ]
+    },
+    "CP-35": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp35_nota_vacia_marca_el_criterio",
+      "fallas": []
+    },
+    "CP-36": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-36",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-36 rechaza la calificación sin todas las notas"
+      ]
+    },
+    "CP-37": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-37",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-37 rechaza una nota escrita con letras"
+      ]
+    },
+    "CP-38": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp38_nota_mayor_a_5_marca_el_criterio",
+      "fallas": []
+    },
+    "CP-39": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-39",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-39 rechaza la nota 5.01"
+      ]
+    },
+    "CP-40": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-40",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-40 rechaza la nota 0.99"
+      ]
+    },
+    "CP-41": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp41_guardar_borrador_sin_puntaje",
+      "fallas": []
+    },
+    "CP-42": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp42_cancelar_la_confirmacion_no_envia_nada",
+      "fallas": []
+    },
+    "CP-43": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp43_confirmar_muestra_puntaje_3_90",
+      "fallas": []
+    },
+    "CP-44": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp44_evaluacion_confirmada_queda_solo_lectura",
+      "fallas": []
+    },
+    "CP-45": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-45",
+      "fallas": [],
+      "estado_http": 200,
+      "pruebas": [
+        "CP-45 no deja cambiar una evaluación confirmada",
+        "CP-45 el puntaje sigue en 3.9"
+      ]
+    },
+    "CP-46": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp46_confirmar_desde_pendiente_muestra_5_00",
+      "fallas": []
+    },
+    "CP-47": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp47_limites_de_la_escala_muestran_2_60",
+      "fallas": []
+    },
+    "CP-48": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp48_proyecto_no_asignado_muestra_recuadro_rojo",
+      "fallas": []
+    },
+    "CP-49": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-49",
+      "fallas": [],
+      "estado_http": 403,
+      "pruebas": [
+        "CP-49 el evaluador no califica un proyecto que no tiene asignado"
+      ]
+    },
+    "CP-50": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp50_feria_sin_rubrica_no_muestra_el_formulario",
+      "fallas": []
+    },
+    "CP-51": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-51",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-51 no se califica sin rúbrica"
+      ]
+    },
+    "CP-52": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-52",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-52 no se califica si los pesos no suman 100 %"
+      ]
+    },
+    "CP-53": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-53",
+      "fallas": [],
+      "estado_http": 422,
+      "pruebas": [
+        "CP-53 no se califica con una rúbrica sin criterios"
+      ]
+    },
+    "CP-54": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp54_estudiante_no_ve_calificar_proyecto",
+      "fallas": []
+    },
+    "CP-55": {
+      "hu": "HU-007",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-55",
+      "fallas": [],
+      "estado_http": 403,
+      "pruebas": [
+        "CP-55 un estudiante no puede calificar"
+      ]
+    },
+    "CP-56": {
+      "hu": "Todas",
+      "tarea": "PDEP-61",
+      "herramienta": "Playwright",
+      "nombre": "test_cp56_sin_sesion_registrar_usuario_lleva_a_ingresar",
+      "fallas": []
+    },
+    "CP-57": {
+      "hu": "Todas",
+      "tarea": "PDEP-62",
+      "herramienta": "Playwright",
+      "nombre": "test_cp57_sin_sesion_inscribir_proyecto_lleva_a_ingresar",
+      "fallas": []
+    },
+    "CP-58": {
+      "hu": "Todas",
+      "tarea": "PDEP-63",
+      "herramienta": "Playwright",
+      "nombre": "test_cp58_sin_sesion_calificar_proyecto_lleva_a_ingresar",
+      "fallas": []
+    },
+    "CP-59": {
+      "hu": "Todas",
+      "tarea": "PDEP-61",
+      "herramienta": "Postman",
+      "nombre": "CP-59",
+      "fallas": [],
+      "estado_http": 401,
+      "pruebas": [
+        "CP-59 sin sesión no se registran usuarios"
+      ]
+    },
+    "CP-60": {
+      "hu": "Todas",
+      "tarea": "PDEP-62",
+      "herramienta": "Postman",
+      "nombre": "CP-60",
+      "fallas": [],
+      "estado_http": 401,
+      "pruebas": [
+        "CP-60 sin sesión no se inscriben proyectos"
+      ]
+    },
+    "CP-61": {
+      "hu": "Todas",
+      "tarea": "PDEP-63",
+      "herramienta": "Postman",
+      "nombre": "CP-61",
+      "fallas": [],
+      "estado_http": 401,
+      "pruebas": [
+        "CP-61 sin sesión no se califica"
+      ]
+    }
+  }
+}
